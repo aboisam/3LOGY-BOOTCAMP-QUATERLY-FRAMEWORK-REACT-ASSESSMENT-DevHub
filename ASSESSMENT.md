@@ -1417,4 +1417,83 @@ Choose any of these for extra credit:
 
 ---
 
+## 🔍 How to Research & Use AI Tools (The Right Way)
+
+> **Real talk:** You WILL get stuck. You WILL need to look things up. That's not cheating — that's what professional developers do every single day. The difference is HOW you use these tools.
+
+### ✅ The Right Way to Research
+
+**1. Start with the official docs (best source)**
+
+| What You're Stuck On | Where to Look |
+|----------------------|---------------|
+| React hooks (useState, useEffect) | [react.dev/reference](https://react.dev/reference/react) |
+| React Router (Link, useNavigate, useParams) | [reactrouter.com](https://reactrouter.com) |
+| Axios (making API calls) | [axios-http.com/docs](https://axios-http.com/docs/intro) |
+| Tailwind classes | [tailwindcss.com/docs](https://tailwindcss.com/docs) |
+| JavaScript (map, filter, spread, async/await) | [developer.mozilla.org](https://developer.mozilla.org) |
+
+**2. Google specific error messages**
+
+When you get an error, copy-paste the exact error message into Google:
+```
+❌ Bad search: "react not working"
+✅ Good search: "TypeError: Cannot read properties of undefined (reading 'map')"
+✅ Good search: "react useEffect missing dependency warning"
+✅ Good search: "axios 401 unauthorized react"
+```
+
+**3. Search for concepts, not solutions**
+
+```
+❌ Bad: "react login page code"              → You'll get someone's full code that doesn't fit your project
+✅ Good: "how to handle form submission react" → You'll learn the pattern and apply it yourself
+✅ Good: "useEffect cleanup function explained" → You'll understand WHY, not just WHAT
+✅ Good: "axios interceptor request example"   → You'll learn the concept and adapt it
+```
+
+### 🤖 Using AI Tools (ChatGPT, Copilot, etc.)
+
+AI tools are allowed, but **how you use them determines whether you learn or not.**
+
+**✅ USE AI TO:**
+
+| Do This | Example Prompt |
+|---------|---------------|
+| **Understand a concept** | *"Explain how useContext works in React. Give me a simple analogy."* |
+| **Debug an error** | *"I'm getting this error: [paste error]. Here's my code: [paste code]. What's wrong?"* |
+| **Understand code you wrote** | *"Can you explain what this useEffect does line by line?"* |
+| **Learn a pattern** | *"How does the axios interceptor pattern work? Explain step by step."* |
+| **Review your approach** | *"I'm building a login page in React. Here's my plan: [describe]. Does this approach make sense?"* |
+
+**❌ DO NOT USE AI TO:**
+
+| Don't Do This | Why It Hurts You |
+|---------------|-----------------|
+| *"Write me a complete login page in React"* | You copy-paste code you don't understand. You'll fail the next project. |
+| *"Build me an AuthContext with login and logout"* | You skip the hardest part of learning. The struggle IS the lesson. |
+| *"Give me all the code for a CRUD snippets page"* | Your code won't match the project's API or structure. You'll spend more time fixing it than writing it yourself. |
+
+### 🧠 The "Can I Explain This?" Test
+
+After using ANY external resource (Google, AI, Stack Overflow, YouTube), ask yourself:
+
+> **"If my tutor asked me to explain this code line by line, could I?"**
+
+- **YES** → You learned from it. Good. ✅
+- **NO** → You copy-pasted without understanding. Go back and figure out what each line does. ❌
+
+### 💡 Pro Tip: Use AI as a Study Buddy, Not a Coder
+
+The best way to use AI on this assessment:
+
+1. **Try it yourself first** — Write the code, even if it's broken
+2. **When stuck, ask AI to explain the concept** — not to write the code
+3. **If your code doesn't work, ask AI to help debug** — paste your code and the error
+4. **After getting it working, ask AI to review** — "Is there a better way to do this?"
+
+This is exactly how senior developers use AI in their jobs. They don't ask AI to write their features — they use it to learn faster and debug smarter.
+
+---
+
 **Good luck! Build something you're proud of. 🚀**
