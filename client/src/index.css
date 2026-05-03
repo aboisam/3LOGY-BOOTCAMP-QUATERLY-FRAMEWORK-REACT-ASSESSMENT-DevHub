@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* ============================================
+   DevShelf — Starter Styles
+   These are provided for you. You may modify
+   or extend them as you build your app.
+   ============================================ */
+
+/* Brand Color Palette (use these in your Tailwind classes or custom CSS) */
+:root {
+  --ds-primary: #6366f1;        /* Indigo — main brand color */
+  --ds-primary-hover: #4f46e5;
+  --ds-secondary: #8b5cf6;      /* Purple — accent */
+  --ds-success: #10b981;        /* Green — success states */
+  --ds-warning: #f59e0b;        /* Amber — warnings */
+  --ds-danger: #ef4444;         /* Red — errors, delete */
+  --ds-bg: #f8fafc;             /* Light background */
+  --ds-surface: #ffffff;        /* Card/surface background */
+  --ds-text: #1e293b;           /* Primary text */
+  --ds-text-muted: #64748b;     /* Secondary text */
+  --ds-border: #e2e8f0;         /* Borders */
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ds-bg: #0f172a;
+    --ds-surface: #1e293b;
+    --ds-text: #f1f5f9;
+    --ds-text-muted: #94a3b8;
+    --ds-border: #334155;
+  }
+}
+
+/* Base resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--ds-bg);
+  color: var(--ds-text);
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+}

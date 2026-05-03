@@ -1,0 +1,31 @@
+# ─── Frontend (React / Node) ──────────────────────────
+client/node_modules/
+client/dist/
+client/.env
+client/.env.local
+client/.env.production
+
+# ─── Backend (.NET) ───────────────────────────────────
+server/bin/
+server/obj/
+server/*.db
+server/*.db-shm
+server/*.db-wal
+server/appsettings.Development.json
+server/appsettings.Production.json
+
+# ─── IDE & OS ─────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+
+# ─── Logs ─────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Tutor Only (do NOT share with students) ──────────
+TUTOR_GUIDE.md
+project1-devshelf-postman.md
