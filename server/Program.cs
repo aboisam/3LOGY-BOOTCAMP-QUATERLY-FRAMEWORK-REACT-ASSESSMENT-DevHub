@@ -28,7 +28,8 @@ if (string.IsNullOrEmpty(jwtKey))
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer(options => {
+    .AddJwtBearer(options =>
+    {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -46,7 +47,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+            "http://localhost:5259",
+            "http://localhost:5173")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -65,13 +68,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.UseHttpsRedirection();
+
 
 
 app.Run();
