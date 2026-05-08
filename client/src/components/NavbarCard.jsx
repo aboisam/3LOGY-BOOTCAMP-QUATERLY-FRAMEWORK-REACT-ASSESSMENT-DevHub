@@ -1,8 +1,9 @@
 import { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
+import AuthContext from '../context/AuthContext.jsx';
+import { AuthProvider } from '../context/AuthContext.jsx';
 
-const Navbar = () => {
+const NavbarCard = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -78,4 +79,4 @@ const Navbar = () => {
     );
 };
 
-export default Navbar;
+export default NavbarCard;
