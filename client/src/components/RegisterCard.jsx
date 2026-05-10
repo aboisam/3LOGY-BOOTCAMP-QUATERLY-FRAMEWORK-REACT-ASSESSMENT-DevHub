@@ -25,11 +25,11 @@ const CheckIcon = () => (
 );
 
 const RegisterPage = () => {
-    const { register, isLoading } = useContext(AuthContext);
+    const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        fullName: '',
+        userName: '',
         email: '',
         password: '',
         confirmPassword: '',
@@ -53,8 +53,8 @@ const RegisterPage = () => {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.fullName.trim()) {
-            newErrors.fullName = 'Full name is required';
+        if (!formData.userName.trim()) {
+            newErrors.userName = 'Full name is required';
         }
         if (!formData.email) {
             newErrors.email = 'Email is required';
@@ -86,9 +86,12 @@ const RegisterPage = () => {
         }
         try {
             setIsSubmitting(true);
-            await register(formData.fullName, formData.email, formData.password);
-            toast.success('Account created! Welcome to DevShelf 🎉');
-            navigate('/dashboard');
+            // Fixed — pass three separate arguments instead of one object
+            // AuthContext.register expects (userName, email, password) not ({userName, email, password})
+            await register(formData.userName, formData.email, formData.password);
+            toast.success('Account created! Please sign in 🎉');
+            // Fixed — redirect to /login not /dashboard since register doesn't log the user in
+            navigate('/login');
         } catch (err) {
             toast.error(err.error || err.message || 'Registration failed. Please try again.');
         } finally {
@@ -105,7 +108,7 @@ const RegisterPage = () => {
             <div className="absolute top-1/2 right-8 w-40 h-40 bg-indigo-800 rounded-full opacity-20 blur-2xl" />
 
             {/* Decorative lines top-right */}
-            <svg className="absolute top-4 right-4 w-28 h-28 opacity-20" viewBox="0 0 120 120" fill="none">
+            <svg className="hidden sm:block absolute top-4 right-4 w-28 h-28 opacity-20" viewBox="0 0 120 120" fill="none">
                 {[0, 12, 24, 36, 48, 60].map((offset, i) => (
                     <line key={i} x1={offset} y1="0" x2="120" y2={120 - offset}
                         stroke="rgb(165,155,255)" strokeWidth="1.2" />
@@ -113,7 +116,7 @@ const RegisterPage = () => {
             </svg>
 
             {/* Decorative lines bottom-left */}
-            <svg className="absolute bottom-4 left-4 w-24 h-24 opacity-15 rotate-180" viewBox="0 0 100 100" fill="none">
+            <svg className="hidden sm:block absolute bottom-4 left-4 w-24 h-24 opacity-15 rotate-180" viewBox="0 0 100 100" fill="none">
                 {[0, 14, 28, 42, 56].map((offset, i) => (
                     <line key={i} x1={offset} y1="0" x2="100" y2={100 - offset}
                         stroke="rgb(165,155,255)" strokeWidth="1.2" />
@@ -121,69 +124,66 @@ const RegisterPage = () => {
             </svg>
 
             {/* Card */}
-            <div className="relative z-10 w-full max-w-md bg-slate-800 bg-opacity-80 border border-slate-700 rounded-2xl shadow-2xl px-10 py-16">
+            <div className="relative z-10 w-full max-w-md bg-slate-800 bg-opacity-80 border border-slate-700 rounded-2xl shadow-2xl px-8 sm:px-10 py-12">
 
                 {/* Brand */}
-                <div className="flex items-center justify-center gap-2 mb-8">
-                    <span className="text-3xl">📁</span>
+                <div className="flex items-center justify-center gap-2 mb-6">
+                    <span className="text-3xl">🗂️</span>
                     <span className="text-white font-bold text-xl tracking-wide">DevShelf</span>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-4xl font-extrabold text-white text-center mb-2 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white text-center mb-2 tracking-tight">
                     Create Account
                 </h1>
-                <p className="text-slate-400 text-sm text-center mb-10">
+                <p className="text-slate-400 text-sm text-center mb-8">
                     Join DevShelf and start building
                 </p>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
                     {/* Full Name */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-300">
-                            Full Name
-                        </label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-300">Full Name</label>
                         <input
                             type="text"
-                            name="fullName"
-                            value={formData.fullName}
+                            name="userName"
+                            autoComplete="username"
+                            value={formData.userName}
                             onChange={handleChange}
                             placeholder="John Doe"
-                            className={`w-full bg-slate-700 border rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.fullName ? 'border-red-500' : 'border-slate-600'}`}
+                            className={`w-full bg-slate-700 border rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.userName ? 'border-red-500' : 'border-slate-600'}`}
                         />
-                        {errors.fullName && (
-                            <p className="text-red-400 text-xs mt-0.5">{errors.fullName}</p>
+                        {errors.userName && (
+                            <p className="text-red-400 text-xs">{errors.userName}</p>
                         )}
                     </div>
 
                     {/* Email */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-300">
-                            Email
-                        </label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-300">Email</label>
                         <input
                             type="email"
                             name="email"
+                            autoComplete="email"
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="you@example.com"
                             className={`w-full bg-slate-700 border rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.email ? 'border-red-500' : 'border-slate-600'}`}
                         />
                         {errors.email && (
-                            <p className="text-red-400 text-xs mt-0.5">{errors.email}</p>
+                            <p className="text-red-400 text-xs">{errors.email}</p>
                         )}
                     </div>
 
                     {/* Password */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-300">
-                            Password
-                        </label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-300">Password</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
                                 name="password"
+                                autoComplete="new-password"
                                 value={formData.password}
                                 onChange={handleChange}
                                 placeholder="••••••••••••"
@@ -199,10 +199,10 @@ const RegisterPage = () => {
                             </button>
                         </div>
                         {errors.password && (
-                            <p className="text-red-400 text-xs mt-0.5">{errors.password}</p>
+                            <p className="text-red-400 text-xs">{errors.password}</p>
                         )}
 
-                        {/* Password strength indicators */}
+                        {/* Password strength indicators — only shown while typing */}
                         {formData.password && (
                             <div className="flex flex-col gap-1.5 mt-1">
                                 {passwordRules.map((rule, i) => {
@@ -223,18 +223,22 @@ const RegisterPage = () => {
                     </div>
 
                     {/* Confirm Password */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-300">
-                            Confirm Password
-                        </label>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-300">Confirm Password</label>
                         <div className="relative">
                             <input
                                 type={showConfirm ? 'text' : 'password'}
                                 name="confirmPassword"
+                                autoComplete="new-password"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 placeholder="••••••••••••"
-                                className={`w-full bg-slate-700 border rounded-xl px-4 py-3.5 pr-11 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.confirmPassword ? 'border-red-500' : formData.confirmPassword && formData.password === formData.confirmPassword ? 'border-indigo-500' : 'border-slate-600'}`}
+                                className={`w-full bg-slate-700 border rounded-xl px-4 py-3.5 pr-11 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.confirmPassword
+                                    ? 'border-red-500'
+                                    : formData.confirmPassword && formData.password === formData.confirmPassword
+                                        ? 'border-indigo-500'
+                                        : 'border-slate-600'
+                                    }`}
                             />
                             <button
                                 type="button"
@@ -246,11 +250,14 @@ const RegisterPage = () => {
                             </button>
                         </div>
                         {errors.confirmPassword && (
-                            <p className="text-red-400 text-xs mt-0.5">{errors.confirmPassword}</p>
+                            <p className="text-red-400 text-xs">{errors.confirmPassword}</p>
                         )}
+                        {/* Green confirmation shown when passwords match */}
                         {!errors.confirmPassword && formData.confirmPassword && formData.password === formData.confirmPassword && (
-                            <p className="text-indigo-400 text-xs mt-0.5 flex items-center gap-1">
-                                <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-indigo-500"><CheckIcon /></span>
+                            <p className="text-indigo-400 text-xs flex items-center gap-1">
+                                <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-indigo-500">
+                                    <CheckIcon />
+                                </span>
                                 Passwords match
                             </p>
                         )}
@@ -264,7 +271,7 @@ const RegisterPage = () => {
                                     setAgreed(!agreed);
                                     setErrors({ ...errors, agreed: '' });
                                 }}
-                                className={`mt-0.5 w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded border-2 flex items-center justify-center transition-all ${agreed ? 'bg-indigo-600 border-indigo-600' : 'border-slate-500 bg-slate-700 group-hover:border-indigo-400'}`}
+                                className={`mt-0.5 min-w-[18px] min-h-[18px] rounded border-2 flex items-center justify-center transition-all ${agreed ? 'bg-indigo-600 border-indigo-600' : 'border-slate-500 bg-slate-700 group-hover:border-indigo-400'}`}
                             >
                                 {agreed && <CheckIcon />}
                             </div>
@@ -280,15 +287,15 @@ const RegisterPage = () => {
                             </span>
                         </label>
                         {errors.agreed && (
-                            <p className="text-red-400 text-xs mt-0.5 ml-7">{errors.agreed}</p>
+                            <p className="text-red-400 text-xs ml-7">{errors.agreed}</p>
                         )}
                     </div>
 
-                    {/* Submit */}
+                    {/* Submit button */}
                     <button
                         type="submit"
-                        disabled={isSubmitting || isLoading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                        disabled={isSubmitting}
+                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl text-sm transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mt-1"
                     >
                         {isSubmitting ? (
                             <span className="flex items-center justify-center gap-2">
@@ -299,11 +306,10 @@ const RegisterPage = () => {
                             'Create Account'
                         )}
                     </button>
-
                 </form>
 
                 {/* Divider */}
-                <div className="flex items-center gap-3 my-8">
+                <div className="flex items-center gap-3 my-7">
                     <div className="flex-1 h-px bg-slate-700" />
                     <span className="text-slate-600 text-xs">or</span>
                     <div className="flex-1 h-px bg-slate-700" />
@@ -319,7 +325,6 @@ const RegisterPage = () => {
                         Sign in
                     </Link>
                 </p>
-
             </div>
         </div>
     );
