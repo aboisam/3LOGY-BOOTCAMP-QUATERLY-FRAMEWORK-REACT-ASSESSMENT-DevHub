@@ -1,10 +1,10 @@
-import Navbar from "../components/NavbarCard"
+// import Navbar from "../components/NavbarCard"
 import RegisterCard from "../components/RegisterCard"
 
 function RegisterPage() {
     return (
         <div>
-            <Navbar />
+            {/* <Navbar /> */}
             <RegisterCard />
         </div>
     )
