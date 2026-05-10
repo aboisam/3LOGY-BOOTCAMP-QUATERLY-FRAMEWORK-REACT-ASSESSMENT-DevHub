@@ -35,52 +35,52 @@ const ResourceCard = ({ resource, onEdit, onDelete }) => {
                 </div>
 
                 {/* Clickable URL — opens in new tab */}
-
-                href={resource.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2 break-all transition-colors block mb-3"
-                onClick={(e) => e.stopPropagation()}
+                <a
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2 break-all transition-colors block mb-3"
+                    onClick={(e) => e.stopPropagation()}
                 >
-                {resource.url}
-            </a>
+                    {resource.url}
+                </a>
 
-            {/* Optional notes */}
-            {resource.notes && (
-                <p className="text-xs text-slate-400 line-clamp-2 mb-3">{resource.notes}</p>
-            )}
+                {/* Optional notes */}
+                {resource.notes && (
+                    <p className="text-xs text-slate-400 line-clamp-2 mb-3">{resource.notes}</p>
+                )}
 
-            {/* Tag pills — split from comma-separated string */}
-            {tagList.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                    {tagList.map((tag, i) => (
-                        <span key={i} className="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded-full">
-                            {tag}
-                        </span>
-                    ))}
+                {/* Tag pills — split from comma-separated string */}
+                {tagList.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                        {tagList.map((tag, i) => (
+                            <span key={i} className="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded-full">
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t border-slate-700 flex items-center justify-between">
+                <span className="text-xs text-slate-500">{formattedDate}</span>
+                <div className="flex gap-2">
+                    <button
+                        onClick={onEdit}
+                        className="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded hover:bg-indigo-900/40 transition-colors"
+                    >
+                        Edit
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-900/40 transition-colors"
+                    >
+                        Delete
+                    </button>
                 </div>
-            )}
-        </div>
-
-            {/* Footer */ }
-    <div className="px-5 py-3 border-t border-slate-700 flex items-center justify-between">
-        <span className="text-xs text-slate-500">{formattedDate}</span>
-        <div className="flex gap-2">
-            <button
-                onClick={onEdit}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded hover:bg-indigo-900/40 transition-colors"
-            >
-                Edit
-            </button>
-            <button
-                onClick={onDelete}
-                className="text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-900/40 transition-colors"
-            >
-                Delete
-            </button>
-        </div>
-    </div>
-    </div >
+            </div>
+        </div >
     );
 };
 
