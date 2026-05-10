@@ -1,31 +1,20 @@
 // Reusable form for creating and editing resources
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const RESOURCE_TYPES = ['article', 'video', 'tool', 'docs', 'other'];
 
 const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        url: '',
-        notes: '',
-        type: 'article',
-        tags: '',
+    const getInitialFormData = (data) => ({
+        title: data?.title || '',
+        url: data?.url || '',
+        notes: data?.notes || '',
+        type: data?.type || 'article',
+        // API stores tags as comma-separated string — display as-is
+        tags: data?.tags || '',
     });
-    const [formErrors, setFormErrors] = useState({});
 
-    // Pre-fill form when editing — tags come as a string from the API already
-    useEffect(() => {
-        if (initialData) {
-            setFormData({
-                title: initialData.title || '',
-                url: initialData.url || '',
-                notes: initialData.notes || '',
-                type: initialData.type || 'article',
-                // API stores tags as comma-separated string — display as-is
-                tags: initialData.tags || '',
-            });
-        }
-    }, [initialData]);
+    const [formData, setFormData] = useState(() => getInitialFormData(initialData));
+    const [formErrors, setFormErrors] = useState({});
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

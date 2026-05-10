@@ -1,5 +1,5 @@
 // Reusable form for creating and editing snippets
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const LANGUAGES = [
     'javascript', 'typescript', 'python', 'csharp',
@@ -7,28 +7,27 @@ const LANGUAGES = [
 ];
 
 const SnippetForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        code: '',
-        language: 'javascript',
-        tags: '',
-    });
-    const [formErrors, setFormErrors] = useState({});
-
-    // Pre-fill when editing — tags come as string from API already
-    useEffect(() => {
+    const [formData, setFormData] = useState(() => {
         if (initialData) {
-            setFormData({
+            return {
                 title: initialData.title || '',
                 description: initialData.description || '',
                 code: initialData.code || '',
                 language: initialData.language || 'javascript',
                 // API stores tags as comma-separated string — keep as-is
                 tags: initialData.tags || '',
-            });
+            };
+        } else {
+            return {
+                title: '',
+                description: '',
+                code: '',
+                language: 'javascript',
+                tags: '',
+            };
         }
-    }, [initialData]);
+    });
+    const [formErrors, setFormErrors] = useState({});
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
