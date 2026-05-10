@@ -26,7 +26,7 @@ const getById = async (id) => {
 // Create a new resource and return the server-assigned object
 const create = async (data) => {
   try {
-    const response = await api.post("/api/resources", data);
+    const response = await api.post("/api/tasks", data);
     return response.data;
   } catch (error) {
     throw error.response?.data || { error: "Failed to create resource" };

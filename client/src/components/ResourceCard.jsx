@@ -1,4 +1,4 @@
-// Displays a single resource — URL opens in a new tab, edit and delete via callback props
+// Displays a single resource — tags come as a string from API so we split for display
 const TYPE_COLORS = {
     article: 'bg-blue-900 text-blue-300',
     video: 'bg-red-900 text-red-300',
@@ -8,10 +8,19 @@ const TYPE_COLORS = {
 };
 
 const ResourceCard = ({ resource, onEdit, onDelete }) => {
-    // Format the ISO date into a readable string like "Jan 5, 2025"
-    const formattedDate = new Date(resource.createdAt).toLocaleDateString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric',
-    });
+    // Guard — never render with undefined data
+    if (!resource) return null;
+
+    const formattedDate = resource.createdAt
+        ? new Date(resource.createdAt).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+        })
+        : 'No date';
+
+    // API returns tags as a comma-separated string — split into array for rendering pills
+    const tagList = resource.tags
+        ? resource.tags.split(',').map((t) => t.trim()).filter(Boolean)
+        : [];
 
     return (
         <div className="bg-slate-800 rounded-2xl border border-slate-700 hover:border-slate-500 transition-all flex flex-col">
@@ -25,25 +34,26 @@ const ResourceCard = ({ resource, onEdit, onDelete }) => {
                     </span>
                 </div>
 
-                {/* Clickable URL — opens in new tab so user doesn't lose the app */}
-                <a
+                {/* Clickable URL — opens in new tab */}
+
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2 break-all transition-colors block mb-3"
+                onClick={(e) => e.stopPropagation()}
                 >
                 {resource.url}
-                </a>
+            </a>
 
-            {/* Optional notes — truncated to 2 lines */}
+            {/* Optional notes */}
             {resource.notes && (
                 <p className="text-xs text-slate-400 line-clamp-2 mb-3">{resource.notes}</p>
             )}
 
-            {/* Tag pills */}
-            {resource.tags && resource.tags.length > 0 && (
+            {/* Tag pills — split from comma-separated string */}
+            {tagList.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                    {resource.tags.map((tag, i) => (
+                    {tagList.map((tag, i) => (
                         <span key={i} className="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded-full">
                             {tag}
                         </span>
@@ -52,7 +62,7 @@ const ResourceCard = ({ resource, onEdit, onDelete }) => {
             )}
         </div>
 
-      {/* Footer — date on left, action buttons on right */ }
+            {/* Footer */ }
     <div className="px-5 py-3 border-t border-slate-700 flex items-center justify-between">
         <span className="text-xs text-slate-500">{formattedDate}</span>
         <div className="flex gap-2">
@@ -71,7 +81,7 @@ const ResourceCard = ({ resource, onEdit, onDelete }) => {
         </div>
     </div>
     </div >
-  );
+    );
 };
 
 export default ResourceCard;
