@@ -1,13 +1,10 @@
-// Persistent navigation bar rendered on every page — shows different links based on auth state
 import { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
-const Navbar = () => {
+const NavbarCard = () => {
     const { user, isAuthenticated, logout } = useContext(AuthContext);
     const navigate = useNavigate();
-
-    // useLocation lets us highlight the active link by comparing pathname to the route
     const location = useLocation();
 
     const handleLogout = () => {
@@ -15,15 +12,15 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    // Helper that applies active styles when the current URL matches the link destination
+    // Helper that applies active highlight matching the mockup's pill style
     const navLink = (to, label) => {
         const isActive = location.pathname === to;
         return (
             <Link
                 to={to}
-                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${isActive
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${isActive
+                    ? 'bg-slate-700 text-white'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
                     }`}
             >
                 {label}
@@ -32,41 +29,60 @@ const Navbar = () => {
     };
 
     return (
-        // sticky top-0 keeps the navbar visible while the user scrolls down any page
-        <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-            <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        // Sticky navbar — dark background with subtle bottom border matching the mockup
+        <nav className="bg-slate-900 border-b border-slate-700/60 sticky top-0 z-50">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+
+                {/* Logo — left side */}
                 <Link
-                    to={isAuthenticated ? '/dashboard' : '/'}
-                    className="font-bold text-indigo-600 text-lg tracking-tight"
+                    to="/dashboard"
+                    className="flex items-center gap-2 font-bold text-white text-lg shrink-0"
                 >
-                    🗂️ DevShelf
+                    <span>DevShelf</span>
+                    <span className="text-xl">🗂️</span>
                 </Link>
 
-                {/* Authenticated view — full nav links plus username and logout */}
-                {isAuthenticated ? (
-                    <div className="flex items-center gap-1">
+                {/* Nav links — center, hidden on mobile */}
+                {isAuthenticated && (
+                    <div className="hidden sm:flex items-center gap-1">
                         {navLink('/dashboard', 'Dashboard')}
                         {navLink('/snippets', 'Snippets')}
                         {navLink('/resources', 'Resources')}
                         {navLink('/tasks', 'Tasks')}
-                        <span className="text-gray-400 mx-2">|</span>
-                        <span className="text-sm text-gray-600 mr-2">{user.userName}</span>
+                    </div>
+                )}
+
+                {/* Right side — username and logout */}
+                {isAuthenticated && (
+                    <div className="flex items-center gap-3 shrink-0">
+
+                        {/* Username with avatar circle */}
+                        <div className="hidden sm:flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                                {user?.userName?.charAt(0)?.toUpperCase() || 'U'}
+                            </div>
+                            <span className="text-sm text-slate-300 font-medium">
+                                {user?.userName}
+                            </span>
+                        </div>
+
+                        {/* Logout button — outlined style matching the mockup */}
                         <button
                             onClick={handleLogout}
-                            className="text-sm font-medium px-3 py-1.5 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            className="text-sm font-medium px-4 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:border-indigo-500 hover:text-white transition-colors"
                         >
                             Logout
                         </button>
                     </div>
-                ) : (
-                    // Guest view — only Login and Register links shown
-                    <div className="flex items-center gap-2">
-                        <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                            Login
-                        </Link>
-                        <Link to="/register" className="text-sm font-medium bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors">
-                            Register
-                        </Link>
+                )}
+
+                {/* Mobile nav — shown only on small screens */}
+                {isAuthenticated && (
+                    <div className="flex sm:hidden items-center gap-1">
+                        {navLink('/dashboard', '🏠')}
+                        {navLink('/snippets', '</>')}
+                        {navLink('/resources', '🔖')}
+                        {navLink('/tasks', '✅')}
                     </div>
                 )}
             </div>
@@ -74,4 +90,4 @@ const Navbar = () => {
     );
 };
 
-export default Navbar;
+export default NavbarCard;

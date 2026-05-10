@@ -1,34 +1,46 @@
-// Reusable form for creating and editing resources — mode determined by initialData
-import { useState } from 'react';
+// Reusable form for creating and editing resources
+import { useState, useEffect } from 'react';
 
 const RESOURCE_TYPES = ['article', 'video', 'tool', 'docs', 'other'];
 
 const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => {
-    // Form fields match exactly what the API expects
     const [formData, setFormData] = useState({
-        title: initialData?.title || '',
-        url: initialData?.url || '',
-        notes: initialData?.notes || '',
-        type: initialData?.type || 'article',
-        tags: Array.isArray(initialData?.tags)
-            ? initialData.tags.join(', ')
-            : initialData?.tags || '',
+        title: '',
+        url: '',
+        notes: '',
+        type: 'article',
+        tags: '',
     });
     const [formErrors, setFormErrors] = useState({});
 
-    // One handler updates any field using the input name as the key
+    // Pre-fill form when editing — tags come as a string from the API already
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                title: initialData.title || '',
+                url: initialData.url || '',
+                notes: initialData.notes || '',
+                type: initialData.type || 'article',
+                // API stores tags as comma-separated string — display as-is
+                tags: initialData.tags || '',
+            });
+        }
+    }, [initialData]);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setFormErrors({ ...formErrors, [e.target.name]: '' });
     };
 
-    // Title and URL are required — everything else is optional
     const validate = () => {
         const errors = {};
         if (!formData.title.trim()) errors.title = 'Title is required';
-        if (!formData.url.trim()) errors.url = 'URL is required';
-        else if (!/^https?:\/\/.+/.test(formData.url.trim()))
+        if (!formData.url.trim()) {
+            errors.url = 'URL is required';
+        } else if (!/^https?:\/\/.+/.test(formData.url.trim())) {
             errors.url = 'URL must start with http:// or https://';
+        }
+        if (!formData.type) errors.type = 'Type is required';
         return errors;
     };
 
@@ -39,12 +51,14 @@ const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => 
             setFormErrors(errors);
             return;
         }
-        // Convert comma-separated tags string back to an array before sending
+        // API expects tags as a comma-separated STRING not an array
+        // Send exactly what the user typed — e.g. "react,docs,frontend"
         const payload = {
-            ...formData,
-            tags: formData.tags
-                ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
-                : [],
+            title: formData.title.trim(),
+            url: formData.url.trim(),
+            notes: formData.notes.trim(),
+            type: formData.type,
+            tags: formData.tags.trim(),
         };
         onSubmit(payload);
     };
@@ -56,7 +70,8 @@ const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => 
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Title field */}
+
+                {/* Title — required */}
                 <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1">Title</label>
                     <input
@@ -70,7 +85,7 @@ const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => 
                     {formErrors.title && <p className="text-red-400 text-xs mt-1">{formErrors.title}</p>}
                 </div>
 
-                {/* URL field — must be a valid http/https link */}
+                {/* URL — required, must be valid http/https */}
                 <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1">URL</label>
                     <input
@@ -84,7 +99,7 @@ const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => 
                     {formErrors.url && <p className="text-red-400 text-xs mt-1">{formErrors.url}</p>}
                 </div>
 
-                {/* Type dropdown */}
+                {/* Type — required dropdown */}
                 <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1">Type</label>
                     <select
@@ -97,9 +112,10 @@ const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => 
                             <option key={type} value={type}>{type}</option>
                         ))}
                     </select>
+                    {formErrors.type && <p className="text-red-400 text-xs mt-1">{formErrors.type}</p>}
                 </div>
 
-                {/* Notes field — optional, for extra context */}
+                {/* Notes — optional */}
                 <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1">
                         Notes <span className="text-slate-500 font-normal">(optional)</span>
@@ -114,17 +130,17 @@ const ResourceForm = ({ initialData = null, onSubmit, onCancel, isLoading }) => 
                     />
                 </div>
 
-                {/* Tags field — comma-separated, converted to array on submit */}
+                {/* Tags — optional, sent as comma-separated string matching the API format */}
                 <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1">
-                        Tags <span className="text-slate-500 font-normal">(comma-separated)</span>
+                        Tags <span className="text-slate-500 font-normal">(comma-separated, optional)</span>
                     </label>
                     <input
                         type="text"
                         name="tags"
                         value={formData.tags}
                         onChange={handleChange}
-                        placeholder="e.g. react, frontend, docs"
+                        placeholder="e.g. react,frontend,docs"
                         className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                     />
                 </div>
