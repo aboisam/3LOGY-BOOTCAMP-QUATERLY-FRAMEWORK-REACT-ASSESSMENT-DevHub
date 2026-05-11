@@ -1,22 +1,201 @@
 // Main snippets page — fetches all snippets, manages CRUD state, and renders the grid
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import snippetService from '../services/snippetService';
-import SnippetCard from '../components/SnippetCard';
 import SnippetForm from '../components/SnippetForm';
 
+/* ─── Language badge colours ─────────────────────────────────────────────── */
+const LANG_BADGE = {
+    javascript: { bg: '#2563eb', color: '#ffffff' },
+    typescript: { bg: '#3b82f6', color: '#ffffff' },
+    python: { bg: '#16a34a', color: '#ffffff' },
+    csharp: { bg: '#7c3aed', color: '#ffffff' },
+    html: { bg: '#ea580c', color: '#ffffff' },
+    css: { bg: '#0891b2', color: '#ffffff' },
+    sql: { bg: '#ca8a04', color: '#ffffff' },
+    java: { bg: '#dc2626', color: '#ffffff' },
+    other: { bg: '#475569', color: '#ffffff' },
+};
+
+const langBadge = (lang = 'other') => LANG_BADGE[lang.toLowerCase()] || LANG_BADGE.other;
+
+/* ─── Edit icon ──────────────────────────────────────────────────────────── */
+const EditIcon = () => (
+    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+);
+
+/* ─── Trash icon ─────────────────────────────────────────────────────────── */
+const TrashIcon = () => (
+    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+        <path d="M10 11v6M14 11v6" />
+        <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+    </svg>
+);
+
+/* ─── Snippet Card ───────────────────────────────────────────────────────── */
+const SnippetCard = ({ snippet, onEdit, onDelete }) => {
+    const badge = langBadge(snippet.language);
+    const tags = snippet.tags
+        ? snippet.tags.split(',').map(t => t.trim()).filter(Boolean).join(', ')
+        : '';
+
+    return (
+        <div style={{
+            background: '#161926',
+            borderRadius: '14px',
+            border: '1px solid rgba(90,100,180,0.20)',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            boxSizing: 'border-box',
+        }}>
+            {/* Title row + badge */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
+                <h3 style={{
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    margin: 0,
+                    lineHeight: 1.3,
+                    flex: 1,
+                }}>
+                    {snippet.title}
+                </h3>
+                <span style={{
+                    background: badge.bg,
+                    color: badge.color,
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    padding: '3px 10px',
+                    borderRadius: '9999px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    letterSpacing: '0.1px',
+                }}>
+                    {snippet.language || 'other'}
+                </span>
+            </div>
+
+            {/* Description */}
+            {snippet.description && (
+                <p style={{
+                    fontSize: '13px',
+                    color: '#94a3b8',
+                    margin: 0,
+                    lineHeight: 1.6,
+                }}>
+                    {snippet.description}
+                </p>
+            )}
+
+            {/* Code block */}
+            {snippet.code && (
+                <div style={{
+                    background: '#0f1117',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    overflow: 'hidden',
+                    maxHeight: '140px',
+                }}>
+                    <pre style={{
+                        margin: 0,
+                        fontSize: '12px',
+                        lineHeight: '18px',
+                        color: '#a5b4fc',
+                        fontFamily: "'JetBrains Mono','Fira Code','Courier New',monospace",
+                        overflow: 'hidden',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-all',
+                    }}>
+                        {snippet.code.length > 300
+                            ? snippet.code.slice(0, 300) + '…'
+                            : snippet.code}
+                    </pre>
+                </div>
+            )}
+
+            {/* Tags + action buttons row */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                gap: '8px',
+                marginTop: 'auto',
+            }}>
+                {/* Tag string */}
+                <span style={{
+                    fontSize: '12px',
+                    color: '#64748b',
+                    lineHeight: 1.5,
+                    flex: 1,
+                }}>
+                    {tags}
+                </span>
+
+                {/* Edit / Delete buttons */}
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    {/* Edit */}
+                    <button
+                        onClick={onEdit}
+                        aria-label="Edit snippet"
+                        style={{
+                            width: '32px', height: '32px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: '8px',
+                            background: 'rgba(99,102,241,0.10)',
+                            border: '1px solid rgba(99,102,241,0.35)',
+                            color: '#818cf8',
+                            cursor: 'pointer',
+                            transition: 'background 0.15s, border-color 0.15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.22)'; e.currentTarget.style.borderColor = '#818cf8'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.10)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)'; }}
+                    >
+                        <EditIcon />
+                    </button>
+                    {/* Delete */}
+                    <button
+                        onClick={onDelete}
+                        aria-label="Delete snippet"
+                        style={{
+                            width: '32px', height: '32px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: '8px',
+                            background: 'rgba(220,38,38,0.10)',
+                            border: '1px solid rgba(220,38,38,0.35)',
+                            color: '#f87171',
+                            cursor: 'pointer',
+                            transition: 'background 0.15s, border-color 0.15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.22)'; e.currentTarget.style.borderColor = '#f87171'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.10)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.35)'; }}
+                    >
+                        <TrashIcon />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ─── Snippets Page ──────────────────────────────────────────────────────── */
 const SnippetsPage = () => {
-    // Core list state — all mutations (add, update, remove) produce a new array immutably
+    const navigate = useNavigate();
+
     const [snippets, setSnippets] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-
-    // showForm toggles the form panel; editingSnippet holds data when in edit mode
-    const [showForm, setShowForm] = useState(false);
     const [editingSnippet, setEditingSnippet] = useState(null);
+    const [showForm, setShowForm] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Fetch snippets once when the component mounts — empty dependency array prevents re-fetching
     useEffect(() => {
         const fetchSnippets = async () => {
             try {
@@ -31,7 +210,6 @@ const SnippetsPage = () => {
         fetchSnippets();
     }, []);
 
-    // Add the newly created snippet to the front of the list without refetching the whole array
     const handleCreate = async (formData) => {
         try {
             setIsSubmitting(true);
@@ -46,20 +224,17 @@ const SnippetsPage = () => {
         }
     };
 
-    // Open the form pre-filled with the selected snippet's data for editing
     const handleEdit = (snippet) => {
         setEditingSnippet(snippet);
         setShowForm(true);
-        // Scroll to top so the form is visible immediately
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Replace the old snippet in the array using .map() — React re-renders only the changed card
     const handleUpdate = async (formData) => {
         try {
             setIsSubmitting(true);
             const updated = await snippetService.update(editingSnippet.id, formData);
-            setSnippets(snippets.map((s) => (s.id === editingSnippet.id ? updated : s)));
+            setSnippets(snippets.map(s => s.id === editingSnippet.id ? updated : s));
             setShowForm(false);
             setEditingSnippet(null);
             toast.success('Snippet updated!');
@@ -70,99 +245,151 @@ const SnippetsPage = () => {
         }
     };
 
-    // Remove the snippet from local state — .filter() returns every item except the deleted one
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this snippet?')) return;
         try {
             await snippetService.remove(id);
-            setSnippets(snippets.filter((s) => s.id !== id));
+            setSnippets(snippets.filter(s => s.id !== id));
             toast.success('Snippet deleted');
         } catch (err) {
             toast.error(err.error || 'Failed to delete snippet');
         }
     };
 
-    // Closing the form also clears editingSnippet so re-opening starts in create mode
     const handleCancel = () => {
         setShowForm(false);
         setEditingSnippet(null);
     };
 
-    // Route the form's onSubmit to either create or update depending on whether we're editing
     const handleFormSubmit = (formData) => {
-        if (editingSnippet) {
-            handleUpdate(formData);
-        } else {
-            handleCreate(formData);
-        }
+        editingSnippet ? handleUpdate(formData) : handleCreate(formData);
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div style={{
+            minHeight: '100vh',
+            background: '#0f1117',
+            padding: '40px 32px 60px',
+            fontFamily: "'Outfit','Inter',sans-serif",
+            boxSizing: 'border-box',
+        }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-            {/* Page header with title and the button that toggles the form */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Snippets</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Save and reuse your code snippets</p>
-                </div>
+                {/* ── Page header ── */}
                 {!showForm && (
-                    <button
-                        onClick={() => setShowForm(true)}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
-                    >
-                        + New Snippet
-                    </button>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '32px',
+                    }}>
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: 800,
+                            color: '#ffffff',
+                            margin: 0,
+                            letterSpacing: '-0.5px',
+                        }}>
+                            My Snippets
+                        </h1>
+                        <button
+                            onClick={() => setShowForm(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '11px 20px',
+                                borderRadius: '10px',
+                                background: '#4f46e5',
+                                border: 'none',
+                                color: '#ffffff',
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: "'Outfit','Inter',sans-serif",
+                                boxShadow: '0 4px 16px rgba(79,70,229,0.40)',
+                                transition: 'background 0.15s, box-shadow 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#5b52f0'; e.currentTarget.style.boxShadow = '0 6px 22px rgba(79,70,229,0.55)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#4f46e5'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(79,70,229,0.40)'; }}
+                        >
+                            <span style={{ fontSize: '18px', lineHeight: 1 }}>+</span>
+                            New Snippet
+                        </button>
+                    </div>
                 )}
+
+                {/* ── Inline form ── */}
+                {showForm && (
+                    <SnippetForm
+                        initialData={editingSnippet}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleCancel}
+                        isLoading={isSubmitting}
+                    />
+                )}
+
+                {/* ── Loading spinner ── */}
+                {isLoading && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+                        <div style={{
+                            width: '32px', height: '32px',
+                            border: '4px solid #4f46e5',
+                            borderTopColor: 'transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 0.75s linear infinite',
+                        }} />
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                )}
+
+                {/* ── Error ── */}
+                {error && !isLoading && (
+                    <div style={{
+                        background: 'rgba(220,38,38,0.10)',
+                        border: '1px solid rgba(220,38,38,0.35)',
+                        borderRadius: '10px',
+                        padding: '14px 18px',
+                        color: '#f87171',
+                        fontSize: '14px',
+                    }}>
+                        {error}
+                    </div>
+                )}
+
+                {/* ── Empty state ── */}
+                {!isLoading && !error && snippets.length === 0 && !showForm && (
+                    <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                        <p style={{ fontSize: '40px', marginBottom: '12px' }}>📋</p>
+                        <p style={{ color: '#94a3b8', fontWeight: 500, fontSize: '16px', margin: '0 0 6px' }}>
+                            No snippets yet
+                        </p>
+                        <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>
+                            Click "New Snippet" to save your first one
+                        </p>
+                    </div>
+                )}
+
+                {/* ── Card grid — 3 columns matching the mockup ── */}
+                {!isLoading && snippets.length > 0 && !showForm && (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '20px',
+                        alignItems: 'start',    /* masonry-like: cards don't stretch */
+                    }}>
+                        {snippets.map(snippet => (
+                            <SnippetCard
+                                key={snippet.id}
+                                snippet={snippet}
+                                onEdit={() => handleEdit(snippet)}
+                                onDelete={() => handleDelete(snippet.id)}
+                            />
+                        ))}
+                    </div>
+                )}
+
             </div>
-
-            {/* Inline form panel — shown when creating or editing */}
-            {showForm && (
-                <SnippetForm
-                    initialData={editingSnippet}
-                    onSubmit={handleFormSubmit}
-                    onCancel={handleCancel}
-                    isLoading={isSubmitting}
-                />
-            )}
-
-            {/* Loading spinner while the initial fetch is in-flight */}
-            {isLoading && (
-                <div className="flex justify-center py-20">
-                    <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-            )}
-
-            {/* Full-page error message if the fetch failed */}
-            {error && !isLoading && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
-                    {error}
-                </div>
-            )}
-
-            {/* Empty state — shown when the fetch succeeded but the user has no snippets yet */}
-            {!isLoading && !error && snippets.length === 0 && (
-                <div className="text-center py-20">
-                    <p className="text-4xl mb-3">📋</p>
-                    <p className="text-gray-500 font-medium">No snippets yet</p>
-                    <p className="text-gray-400 text-sm mt-1">Click "New Snippet" to save your first one</p>
-                </div>
-            )}
-
-            {/* Responsive grid — 1 column on mobile, 2 on tablet, 3 on desktop */}
-            {!isLoading && snippets.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {snippets.map((snippet) => (
-                        // key must be unique and stable — using the server-assigned id satisfies both
-                        <SnippetCard
-                            key={snippet.id}
-                            snippet={snippet}
-                            onEdit={() => handleEdit(snippet)}
-                            onDelete={() => handleDelete(snippet.id)}
-                        />
-                    ))}
-                </div>
-            )}
         </div>
     );
 };

@@ -5,15 +5,12 @@ import taskService from '../services/taskService';
 import TaskCard from '../components/TaskCard';
 import TaskForm from '../components/TaskForm';
 
-// Filter options shown as tabs above the grid
-const FILTERS = ['all', 'todo', 'in-progress', 'done'];
-
-const FILTER_LABELS = {
-    'all': 'All',
-    'todo': 'Todo',
-    'in-progress': 'In Progress',
-    'done': 'Done',
-};
+const FILTERS = [
+    { key: 'all', label: 'All' },
+    { key: 'todo', label: 'Todo' },
+    { key: 'in-progress', label: 'In Progress' },
+    { key: 'done', label: 'Done' },
+];
 
 const TasksPage = () => {
     const [tasks, setTasks] = useState([]);
@@ -22,11 +19,8 @@ const TasksPage = () => {
     const [error, setError] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
-
-    // Active filter — 'all' shows every task, others filter by status
     const [activeFilter, setActiveFilter] = useState('all');
 
-    // Fetch all tasks on mount — filtering happens client-side
     useEffect(() => {
         const fetchTasks = async () => {
             try {
@@ -41,10 +35,9 @@ const TasksPage = () => {
         fetchTasks();
     }, []);
 
-    // Filter the tasks array based on the active tab — no extra API call needed
     const filteredTasks = activeFilter === 'all'
         ? tasks
-        : tasks.filter((t) => t.status === activeFilter);
+        : tasks.filter(t => t.status === activeFilter);
 
     const handleCreate = async (formData) => {
         try {
@@ -70,7 +63,7 @@ const TasksPage = () => {
         try {
             setIsSubmitting(true);
             const updated = await taskService.update(editingTask.id, formData);
-            setTasks(tasks.map((t) => (t.id === editingTask.id ? updated : t)));
+            setTasks(tasks.map(t => t.id === editingTask.id ? updated : t));
             setShowForm(false);
             setEditingTask(null);
             toast.success('Task updated!');
@@ -85,7 +78,7 @@ const TasksPage = () => {
         if (!window.confirm('Delete this task?')) return;
         try {
             await taskService.remove(id);
-            setTasks(tasks.filter((t) => t.id !== id));
+            setTasks(tasks.filter(t => t.id !== id));
             toast.success('Task deleted');
         } catch (err) {
             toast.error(err.error || 'Failed to delete task');
@@ -98,112 +91,179 @@ const TasksPage = () => {
     };
 
     const handleFormSubmit = (formData) => {
-        if (editingTask) {
-            handleUpdate(formData);
-        } else {
-            handleCreate(formData);
-        }
+        editingTask ? handleUpdate(formData) : handleCreate(formData);
     };
 
-    // Called by TaskCard when the status badge is clicked — updates the task in local state
     const handleStatusChange = (updatedTask) => {
-        setTasks(tasks.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+        setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div style={{
+            minHeight: '100vh',
+            background: '#0f1117',
+            padding: '40px 32px 60px',
+            fontFamily: "'Outfit','Inter',sans-serif",
+            boxSizing: 'border-box',
+        }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-            {/* Page header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-white">Tasks</h1>
-                    <p className="text-sm text-slate-400 mt-0.5">Track and manage your work</p>
-                </div>
+                {/* ── Page header ── */}
                 {!showForm && (
-                    <button
-                        onClick={() => setShowForm(true)}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-                    >
-                        + New Task
-                    </button>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '28px',
+                    }}>
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: 800,
+                            color: '#ffffff',
+                            margin: 0,
+                            letterSpacing: '-0.5px',
+                        }}>
+                            My Tasks
+                        </h1>
+                        <button
+                            onClick={() => setShowForm(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '11px 22px',
+                                borderRadius: '10px',
+                                background: '#4f46e5',
+                                border: 'none',
+                                color: '#ffffff',
+                                fontSize: '15px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                                boxShadow: '0 4px 16px rgba(79,70,229,0.40)',
+                                transition: 'background 0.15s, box-shadow 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#5b52f0'; e.currentTarget.style.boxShadow = '0 6px 22px rgba(79,70,229,0.55)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#4f46e5'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(79,70,229,0.40)'; }}
+                        >
+                            <span style={{ fontSize: '18px', lineHeight: 1 }}>+</span>
+                            New Task
+                        </button>
+                    </div>
                 )}
+
+                {/* ── Inline form ── */}
+                {showForm && (
+                    <TaskForm
+                        initialData={editingTask}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleCancel}
+                        isLoading={isSubmitting}
+                    />
+                )}
+
+                {/* ── Filter tabs — underline style ── */}
+                {!showForm && (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        borderBottom: '1px solid rgba(90,100,180,0.18)',
+                        marginBottom: '28px',
+                    }}>
+                        {FILTERS.map(({ key, label }) => {
+                            const isActive = activeFilter === key;
+                            return (
+                                <button
+                                    key={key}
+                                    onClick={() => setActiveFilter(key)}
+                                    style={{
+                                        padding: '10px 18px',
+                                        fontSize: '14px',
+                                        fontWeight: isActive ? 600 : 400,
+                                        color: isActive ? '#818cf8' : '#6b7280',
+                                        background: 'none',
+                                        border: 'none',
+                                        borderBottom: isActive ? '2px solid #818cf8' : '2px solid transparent',
+                                        marginBottom: '-1px',
+                                        cursor: 'pointer',
+                                        fontFamily: 'inherit',
+                                        transition: 'color 0.15s',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = '#c0caf5'; }}
+                                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = '#6b7280'; }}
+                                >
+                                    {label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* ── Loading ── */}
+                {isLoading && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+                        <div style={{
+                            width: '32px', height: '32px',
+                            border: '4px solid #4f46e5',
+                            borderTopColor: 'transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 0.75s linear infinite',
+                        }} />
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                )}
+
+                {/* ── Error ── */}
+                {error && !isLoading && (
+                    <div style={{
+                        background: 'rgba(220,38,38,0.10)',
+                        border: '1px solid rgba(220,38,38,0.35)',
+                        borderRadius: '10px',
+                        padding: '14px 18px',
+                        color: '#f87171',
+                        fontSize: '14px',
+                    }}>
+                        {error}
+                    </div>
+                )}
+
+                {/* ── Empty state ── */}
+                {!isLoading && !error && filteredTasks.length === 0 && !showForm && (
+                    <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                        <p style={{ fontSize: '36px', margin: '0 0 12px' }}>✅</p>
+                        <p style={{ color: '#94a3b8', fontWeight: 500, fontSize: '16px', margin: '0 0 6px' }}>
+                            {activeFilter === 'all' ? 'No tasks yet' : `No ${FILTERS.find(f => f.key === activeFilter)?.label} tasks`}
+                        </p>
+                        <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>
+                            {activeFilter === 'all'
+                                ? 'Click "+ New Task" to add your first task'
+                                : 'Try a different filter or create a new task'}
+                        </p>
+                    </div>
+                )}
+
+                {/* ── 3-column card grid matching the snippets page layout ── */}
+                {!isLoading && !error && filteredTasks.length > 0 && !showForm && (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '20px',
+                        alignItems: 'start',
+                    }}>
+                        {filteredTasks.map(task => (
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                                onEdit={() => handleEdit(task)}
+                                onDelete={() => handleDelete(task.id)}
+                                onStatusChange={handleStatusChange}
+                            />
+                        ))}
+                    </div>
+                )}
+
             </div>
-
-            {/* Inline form */}
-            {showForm && (
-                <TaskForm
-                    initialData={editingTask}
-                    onSubmit={handleFormSubmit}
-                    onCancel={handleCancel}
-                    isLoading={isSubmitting}
-                />
-            )}
-
-            {/* Filter tabs — client-side filtering, no API call on tab change */}
-            <div className="flex gap-2 mb-6 flex-wrap">
-                {FILTERS.map((filter) => (
-                    <button
-                        key={filter}
-                        onClick={() => setActiveFilter(filter)}
-                        className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-colors ${activeFilter === filter
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
-                            }`}
-                    >
-                        {FILTER_LABELS[filter]}
-                        {/* Show count badge next to each tab */}
-                        <span className="ml-1.5 text-xs opacity-70">
-                            {filter === 'all'
-                                ? tasks.length
-                                : tasks.filter((t) => t.status === filter).length}
-                        </span>
-                    </button>
-                ))}
-            </div>
-
-            {/* Loading spinner */}
-            {isLoading && (
-                <div className="flex justify-center py-20">
-                    <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                </div>
-            )}
-
-            {/* Error state */}
-            {error && !isLoading && (
-                <div className="bg-red-900/30 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
-                    {error}
-                </div>
-            )}
-
-            {/* Empty state — different message depending on whether a filter is active */}
-            {!isLoading && !error && filteredTasks.length === 0 && (
-                <div className="text-center py-20">
-                    <p className="text-4xl mb-3">✅</p>
-                    <p className="text-slate-400 font-medium">
-                        {activeFilter === 'all' ? 'No tasks yet' : `No ${FILTER_LABELS[activeFilter]} tasks`}
-                    </p>
-                    <p className="text-slate-500 text-sm mt-1">
-                        {activeFilter === 'all'
-                            ? 'Click "New Task" to add your first task'
-                            : 'Try a different filter or create a new task'}
-                    </p>
-                </div>
-            )}
-
-            {/* Task grid */}
-            {!isLoading && filteredTasks.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {filteredTasks.map((task) => (
-                        <TaskCard
-                            key={task.id}
-                            task={task}
-                            onEdit={() => handleEdit(task)}
-                            onDelete={() => handleDelete(task.id)}
-                            onStatusChange={handleStatusChange}
-                        />
-                    ))}
-                </div>
-            )}
         </div>
     );
 };

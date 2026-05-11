@@ -3,50 +3,76 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 
-// Stat card icons
+/* ─── Icons ────────────────────────────────────────────────────────────── */
 const SnippetsIcon = () => (
-    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6">
         <polyline points="16 18 22 12 16 6" />
         <polyline points="8 6 2 12 8 18" />
     </svg>
 );
 
 const ResourcesIcon = () => (
-    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6">
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
     </svg>
 );
 
 const TasksIcon = () => (
-    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-        <line x1="9" y1="6" x2="20" y2="6" />
-        <line x1="9" y1="12" x2="20" y2="12" />
-        <line x1="9" y1="18" x2="20" y2="18" />
+    <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6">
+        <line x1="10" y1="6" x2="21" y2="6" />
+        <line x1="10" y1="12" x2="21" y2="12" />
+        <line x1="10" y1="18" x2="21" y2="18" />
         <polyline points="4 6 5 7 7 5" />
         <polyline points="4 12 5 13 7 11" />
         <polyline points="4 18 5 19 7 17" />
     </svg>
 );
 
-// Badge color map for recent items type tags
-const TYPE_COLORS = {
-    Snippets: 'bg-indigo-900 text-indigo-300 border border-indigo-700',
-    Resources: 'bg-slate-700 text-slate-300 border border-slate-500',
-    Tasks: 'bg-teal-900 text-teal-300 border border-teal-700',
-};
+/* ─── Stat card ─────────────────────────────────────────────────────────── */
+const StatCard = ({ count, label, icon, gradient, onClick }) => (
+    <div
+        onClick={onClick}
+        style={{
+            background: gradient,
+            borderRadius: '16px',
+            padding: '24px 20px',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '120px',
+            transition: 'filter 0.15s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.08)')}
+        onMouseLeave={e => (e.currentTarget.style.filter = 'brightness(1)')}
+    >
+        {/* Top row — count left, icon right */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '42px', fontWeight: 700, color: '#ffffff', lineHeight: 1 }}>
+                {count}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.70)' }}>
+                {icon}
+            </span>
+        </div>
+        {/* Label bottom-left */}
+        <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginTop: '12px' }}>
+            {label}
+        </span>
+    </div>
+);
 
+/* ─── Main page ─────────────────────────────────────────────────────────── */
 const DashboardPage = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const username = user?.userName || user?.email?.split('@')[0] || 'there';
 
-    // Real data fetched from the API — starts at zero while loading
     const [stats, setStats] = useState({ snippets: 0, resources: 0, tasks: 0 });
     const [taskCounts, setTaskCounts] = useState({ todo: 0, inProgress: 0, done: 0 });
     const [recentItems, setRecentItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch all three endpoints in parallel — Promise.all waits for all before updating state
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -60,42 +86,34 @@ const DashboardPage = () => {
                 const resources = resourcesRes.data;
                 const tasks = tasksRes.data;
 
-                // Update stat card counts
                 setStats({
                     snippets: snippets.length,
                     resources: resources.length,
                     tasks: tasks.length,
                 });
 
-                // Count tasks by status — normalise casing for safe comparison
                 setTaskCounts({
-                    todo: tasks.filter((t) => t.status?.toLowerCase() === 'todo').length,
-                    inProgress: tasks.filter((t) => t.status?.toLowerCase() === 'in-progress').length,
-                    done: tasks.filter((t) => t.status?.toLowerCase() === 'done').length,
+                    todo: tasks.filter(t => t.status?.toLowerCase() === 'todo').length,
+                    inProgress: tasks.filter(t => t.status?.toLowerCase() === 'in-progress').length,
+                    done: tasks.filter(t => t.status?.toLowerCase() === 'done').length,
                 });
 
-                // Build recent items from latest 3 snippets and 3 resources combined
-                const recentSnippets = snippets.slice(0, 3).map((s) => ({
+                const recentSnippets = snippets.slice(0, 3).map(s => ({
                     id: `snippet-${s.id}`,
                     title: s.title,
                     type: 'Snippets',
-                    date: new Date(s.createdAt).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric',
-                    }),
+                    date: new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                     path: `/snippets/${s.id}`,
                 }));
 
-                const recentResources = resources.slice(0, 3).map((r) => ({
+                const recentResources = resources.slice(0, 3).map(r => ({
                     id: `resource-${r.id}`,
                     title: r.title,
                     type: 'Resources',
-                    date: new Date(r.createdAt).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric',
-                    }),
+                    date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                     path: `/resources`,
                 }));
 
-                // Merge, sort newest first, and take the top 5
                 const merged = [...recentSnippets, ...recentResources]
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 5);
@@ -110,151 +128,262 @@ const DashboardPage = () => {
         fetchData();
     }, []);
 
-    // Full-page spinner while data is loading
+    /* Loading spinner */
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div style={{
+                minHeight: '100vh',
+                background: '#252840',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                <div style={{
+                    width: '32px', height: '32px',
+                    border: '4px solid #6366f1',
+                    borderTop: '4px solid transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 0.75s linear infinite',
+                }} />
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         );
     }
 
-    return (
-        // Page background matches the dark navy in the mockup
-        <div className="min-h-screen bg-slate-900 px-4 sm:px-6 py-8">
-            <div className="max-w-4xl mx-auto">
+    /* ── Badge colours per type — matches the mockup's muted purple / slate pills ── */
+    const badgeStyle = {
+        Snippets: { background: 'rgba(99,102,241,0.25)', color: '#a5b4fc' },
+        Resources: { background: 'rgba(100,116,139,0.25)', color: '#94a3b8' },
+        Tasks: { background: 'rgba(20,184,166,0.20)', color: '#5eead4' },
+    };
 
-                {/* Welcome heading — username highlighted in indigo to match mockup */}
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8">
+    return (
+        /* Outer page — muted purple-navy background matching the mockup */
+        <div style={{
+            minHeight: '100vh',
+            background: '#252840',         /* the purple-navy outer bg */
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            padding: '32px 16px',
+        }}>
+            {/* Inner rounded dark card — the main content container */}
+            <div style={{
+                background: '#1e2035',     /* slightly darker card surface */
+                borderRadius: '20px',
+                padding: '32px 28px',
+                width: '100%',
+                maxWidth: '860px',
+            }}>
+
+                {/* Welcome heading */}
+                <h1 style={{
+                    fontSize: '26px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    marginBottom: '28px',
+                    lineHeight: 1.3,
+                }}>
                     Welcome back,{' '}
-                    <span className="text-indigo-400">{username}</span>!
+                    <span style={{ color: '#818cf8' }}>{username}</span>!
                 </h1>
 
-                {/* Stat cards — 3 columns matching the mockup layout */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-
-                    {/* Snippets card — purple gradient */}
-                    <div
+                {/* ── Stat cards ── */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '16px',
+                    marginBottom: '20px',
+                }}>
+                    <StatCard
+                        count={stats.snippets}
+                        label="Snippets"
+                        icon={<SnippetsIcon />}
+                        gradient="linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
                         onClick={() => navigate('/snippets')}
-                        className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-5 cursor-pointer hover:opacity-90 transition-opacity"
-                    >
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-4xl font-bold text-white mb-1">{stats.snippets}</p>
-                                <p className="text-purple-200 text-sm font-medium">Snippets</p>
-                            </div>
-                            <div className="text-purple-200 opacity-80 mt-1">
-                                <SnippetsIcon />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Resources card — blue gradient */}
-                    <div
+                    />
+                    <StatCard
+                        count={stats.resources}
+                        label="Resources"
+                        icon={<ResourcesIcon />}
+                        gradient="linear-gradient(135deg, #4338ca 0%, #3730a3 100%)"
                         onClick={() => navigate('/resources')}
-                        className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-5 cursor-pointer hover:opacity-90 transition-opacity"
-                    >
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-4xl font-bold text-white mb-1">{stats.resources}</p>
-                                <p className="text-blue-200 text-sm font-medium">Resources</p>
-                            </div>
-                            <div className="text-blue-200 opacity-80 mt-1">
-                                <ResourcesIcon />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Tasks card — teal gradient */}
-                    <div
+                    />
+                    <StatCard
+                        count={stats.tasks}
+                        label="Tasks"
+                        icon={<TasksIcon />}
+                        gradient="linear-gradient(135deg, #0f766e 0%, #0d9488 100%)"
                         onClick={() => navigate('/tasks')}
-                        className="bg-gradient-to-br from-teal-500 to-cyan-700 rounded-2xl p-5 cursor-pointer hover:opacity-90 transition-opacity"
-                    >
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-4xl font-bold text-white mb-1">{stats.tasks}</p>
-                                <p className="text-teal-100 text-sm font-medium">Tasks</p>
-                            </div>
-                            <div className="text-teal-100 opacity-80 mt-1">
-                                <TasksIcon />
-                            </div>
-                        </div>
-                    </div>
+                    />
                 </div>
 
-                {/* Tasks Overview card — matches the mockup's inner dark panel */}
-                <div className="bg-slate-800 rounded-2xl p-6 mb-4">
-                    <h2 className="text-white font-bold text-lg mb-4">Tasks Overview</h2>
-                    <div className="bg-slate-900 rounded-xl px-5 py-4">
+                {/* ── Tasks Overview panel ── */}
+                <div style={{
+                    background: '#262840',
+                    borderRadius: '16px',
+                    padding: '20px 24px',
+                    marginBottom: '20px',
+                }}>
+                    <h2 style={{
+                        fontSize: '17px',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        marginBottom: '16px',
+                    }}>
+                        Tasks Overview
+                    </h2>
 
-                        {/* Status pills — exact colors from the mockup */}
+                    {/* Dark inner strip with status pills */}
+                    <div style={{
+                        background: '#1a1c30',
+                        borderRadius: '12px',
+                        padding: '14px 18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        minHeight: '52px',
+                    }}>
                         {stats.tasks === 0 ? (
-                            <p className="text-slate-500 text-sm">No tasks yet</p>
+                            <span style={{ fontSize: '13px', color: '#64748b' }}>
+                                No tasks yet
+                            </span>
                         ) : (
-                            <div className="flex flex-wrap items-center gap-3">
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
 
-                                {/* Todo — blue pill */}
-                                <span
+                                {/* Todo — blue */}
+                                <button
                                     onClick={() => navigate('/tasks')}
-                                    className="flex items-center gap-2 bg-blue-500 text-white text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer hover:bg-blue-400 transition-colors"
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        background: '#3b82f6',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        borderRadius: '9999px',
+                                        padding: '6px 14px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                    }}
                                 >
                                     <span>{taskCounts.todo}</span>
                                     <span>Todo</span>
-                                </span>
+                                </button>
 
-                                {/* In Progress — amber/orange pill */}
-                                <span
+                                {/* In Progress — amber */}
+                                <button
                                     onClick={() => navigate('/tasks')}
-                                    className="flex items-center gap-2 bg-amber-400 text-slate-900 text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer hover:bg-amber-300 transition-colors"
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        background: '#f59e0b',
+                                        color: '#1c1917',
+                                        border: 'none',
+                                        borderRadius: '9999px',
+                                        padding: '6px 14px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                    }}
                                 >
                                     <span>{taskCounts.inProgress}</span>
                                     <span>In Progress</span>
-                                </span>
+                                </button>
 
-                                {/* Done — green pill */}
-                                <span
+                                {/* Done — green */}
+                                <button
                                     onClick={() => navigate('/tasks')}
-                                    className="flex items-center gap-2 bg-green-500 text-white text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer hover:bg-green-400 transition-colors"
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        background: '#22c55e',
+                                        color: '#052e16',
+                                        border: 'none',
+                                        borderRadius: '9999px',
+                                        padding: '6px 14px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                    }}
                                 >
                                     <span>{taskCounts.done}</span>
                                     <span>Done</span>
-                                </span>
+                                </button>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Recent Items section */}
+                {/* ── Recent Items ── */}
                 <div>
-                    <h2 className="text-white font-bold text-lg mb-4">Recent Items</h2>
+                    <h2 style={{
+                        fontSize: '17px',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        marginBottom: '14px',
+                    }}>
+                        Recent Items
+                    </h2>
 
-                    {/* Empty state when no snippets or resources exist yet */}
                     {recentItems.length === 0 ? (
-                        <div className="bg-slate-800 rounded-2xl px-5 py-10 text-center">
-                            <p className="text-slate-400 text-sm">
+                        <div style={{
+                            background: '#262840',
+                            borderRadius: '14px',
+                            padding: '40px 20px',
+                            textAlign: 'center',
+                        }}>
+                            <p style={{ color: '#64748b', fontSize: '13px' }}>
                                 No items yet — create a snippet or resource to see them here
                             </p>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-3">
-                            {recentItems.map((item) => (
-                                // Each row is clickable and navigates to the relevant page
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {recentItems.map(item => (
                                 <div
                                     key={item.id}
                                     onClick={() => navigate(item.path)}
-                                    className="bg-slate-800 rounded-2xl px-5 py-4 flex items-center justify-between hover:bg-slate-700 transition-colors cursor-pointer"
+                                    style={{
+                                        background: '#262840',
+                                        borderRadius: '14px',
+                                        padding: '14px 20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.15s',
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = '#2e3052')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = '#262840')}
                                 >
-                                    {/* Item title */}
-                                    <span className="text-white text-sm font-medium truncate mr-4">
+                                    {/* Title */}
+                                    <span style={{
+                                        fontSize: '14px',
+                                        fontWeight: 500,
+                                        color: '#e2e8f0',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        marginRight: '16px',
+                                    }}>
                                         {item.title}
                                     </span>
 
-                                    {/* Type badge and date — right aligned */}
-                                    <div className="flex items-center gap-4 shrink-0">
-                                        <span className={`text-xs font-medium px-3 py-1 rounded-full ${TYPE_COLORS[item.type]}`}>
+                                    {/* Badge + date */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+                                        <span style={{
+                                            fontSize: '12px',
+                                            fontWeight: 500,
+                                            padding: '4px 12px',
+                                            borderRadius: '9999px',
+                                            ...badgeStyle[item.type],
+                                        }}>
                                             {item.type}
                                         </span>
-                                        <span className="text-slate-400 text-sm">{item.date}</span>
+                                        <span style={{
+                                            fontSize: '13px',
+                                            color: '#94a3b8',
+                                            minWidth: '48px',
+                                            textAlign: 'right',
+                                        }}>
+                                            {item.date}
+                                        </span>
                                     </div>
                                 </div>
                             ))}

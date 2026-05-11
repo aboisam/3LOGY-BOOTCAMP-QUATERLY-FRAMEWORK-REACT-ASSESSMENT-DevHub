@@ -12,77 +12,205 @@ const NavbarCard = () => {
         navigate('/login');
     };
 
-    // Helper that applies active highlight matching the mockup's pill style
-    const navLink = (to, label) => {
-        const isActive = location.pathname === to;
-        return (
-            <Link
-                to={to}
-                className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${isActive
-                    ? 'bg-slate-700 text-white'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                    }`}
-            >
-                {label}
-            </Link>
-        );
-    };
+    const navLinks = [
+        { to: '/dashboard', label: 'Dashboard' },
+        { to: '/snippets', label: 'Snippets' },
+        { to: '/resources', label: 'Resources' },
+        { to: '/tasks', label: 'Tasks' },
+    ];
 
     return (
-        // Sticky navbar — dark background with subtle bottom border matching the mockup
-        <nav className="bg-slate-900 border-b border-slate-700/60 sticky top-0 z-50">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-
-                {/* Logo — left side */}
+        <nav
+            style={{
+                backgroundColor: '#161929',
+                borderBottom: '1px solid rgba(255,255,255,0.07)',
+                position: 'sticky',
+                top: 0,
+                zIndex: 50,
+                width: '100%',
+            }}
+        >
+            <div
+                style={{
+                    maxWidth: '960px',
+                    margin: '0 auto',
+                    padding: '0 24px',
+                    height: '60px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                }}
+            >
+                {/* ── Logo ── */}
                 <Link
                     to="/dashboard"
-                    className="flex items-center gap-2 font-bold text-white text-lg shrink-0"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        textDecoration: 'none',
+                        flexShrink: 0,
+                    }}
                 >
-                    <span>DevShelf</span>
-                    <span className="text-xl">🗂️</span>
+                    <span
+                        style={{
+                            fontWeight: 700,
+                            fontSize: '18px',
+                            letterSpacing: '-0.3px',
+                            color: '#ffffff',
+                        }}
+                    >
+                        Dev<span style={{ color: '#ffffff' }}>Shelf</span>
+                    </span>
+                    {/* folder emoji matching the mockup */}
+                    <span style={{ fontSize: '18px', lineHeight: 1 }}>📁</span>
                 </Link>
 
-                {/* Nav links — center, hidden on mobile */}
+                {/* ── Centre nav links ── */}
                 {isAuthenticated && (
-                    <div className="hidden sm:flex items-center gap-1">
-                        {navLink('/dashboard', 'Dashboard')}
-                        {navLink('/snippets', 'Snippets')}
-                        {navLink('/resources', 'Resources')}
-                        {navLink('/tasks', 'Tasks')}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                        }}
+                    >
+                        {navLinks.map(({ to, label }) => {
+                            const isActive = location.pathname === to;
+                            return (
+                                <Link
+                                    key={to}
+                                    to={to}
+                                    style={{
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: isActive ? 500 : 400,
+                                        color: isActive ? '#ffffff' : '#94a3b8',
+                                        padding: '6px 16px',
+                                        borderRadius: '9999px',
+                                        backgroundColor: isActive
+                                            ? 'rgba(255,255,255,0.10)'
+                                            : 'transparent',
+                                        transition: 'background 0.15s, color 0.15s',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                    onMouseEnter={e => {
+                                        if (!isActive) {
+                                            e.currentTarget.style.backgroundColor =
+                                                'rgba(255,255,255,0.06)';
+                                            e.currentTarget.style.color = '#ffffff';
+                                        }
+                                    }}
+                                    onMouseLeave={e => {
+                                        if (!isActive) {
+                                            e.currentTarget.style.backgroundColor =
+                                                'transparent';
+                                            e.currentTarget.style.color = '#94a3b8';
+                                        }
+                                    }}
+                                >
+                                    {label}
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
 
-                {/* Right side — username and logout */}
+                {/* ── Right side: avatar + username + logout ── */}
                 {isAuthenticated && (
-                    <div className="flex items-center gap-3 shrink-0">
-
-                        {/* Username with avatar circle */}
-                        <div className="hidden sm:flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                                {user?.userName?.charAt(0)?.toUpperCase() || 'U'}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            flexShrink: 0,
+                        }}
+                    >
+                        {/* Username with avatar */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                            }}
+                        >
+                            {/* Avatar circle — shows user photo if available, else initials */}
+                            <div
+                                style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    overflow: 'hidden',
+                                    border: '2px solid rgba(255,255,255,0.15)',
+                                    flexShrink: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: '#4f46e5',
+                                }}
+                            >
+                                {user?.avatarUrl ? (
+                                    <img
+                                        src={user.avatarUrl}
+                                        alt={user.userName}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                ) : (
+                                    <span
+                                        style={{
+                                            fontSize: '13px',
+                                            fontWeight: 600,
+                                            color: '#ffffff',
+                                        }}
+                                    >
+                                        {user?.userName?.charAt(0)?.toUpperCase() || 'U'}
+                                    </span>
+                                )}
                             </div>
-                            <span className="text-sm text-slate-300 font-medium">
+
+                            <span
+                                style={{
+                                    fontSize: '14px',
+                                    fontWeight: 400,
+                                    color: '#e2e8f0',
+                                }}
+                            >
                                 {user?.userName}
                             </span>
                         </div>
 
-                        {/* Logout button — outlined style matching the mockup */}
+                        {/* Logout — outlined pill matching the mockup's purple border */}
                         <button
                             onClick={handleLogout}
-                            className="text-sm font-medium px-4 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:border-indigo-500 hover:text-white transition-colors"
+                            style={{
+                                fontSize: '14px',
+                                fontWeight: 400,
+                                color: '#e2e8f0',
+                                padding: '6px 18px',
+                                borderRadius: '9999px',
+                                border: '1.5px solid #7c3aed',
+                                backgroundColor: 'transparent',
+                                cursor: 'pointer',
+                                transition: 'background 0.15s, color 0.15s',
+                                whiteSpace: 'nowrap',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.backgroundColor =
+                                    'rgba(124,58,237,0.15)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.color = '#e2e8f0';
+                            }}
                         >
                             Logout
                         </button>
-                    </div>
-                )}
-
-                {/* Mobile nav — shown only on small screens */}
-                {isAuthenticated && (
-                    <div className="flex sm:hidden items-center gap-1">
-                        {navLink('/dashboard', '🏠')}
-                        {navLink('/snippets', '</>')}
-                        {navLink('/resources', '🔖')}
-                        {navLink('/tasks', '✅')}
                     </div>
                 )}
             </div>
