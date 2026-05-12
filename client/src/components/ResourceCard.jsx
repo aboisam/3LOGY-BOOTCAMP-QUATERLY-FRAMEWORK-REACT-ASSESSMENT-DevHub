@@ -1,87 +1,63 @@
-// Displays a single resource — tags come as a string from API so we split for display
-const TYPE_COLORS = {
-    article: 'bg-blue-900 text-blue-300',
-    video: 'bg-red-900 text-red-300',
-    tool: 'bg-green-900 text-green-300',
-    docs: 'bg-yellow-900 text-yellow-300',
-    other: 'bg-slate-700 text-slate-300',
+const TYPE_BADGE = {
+    csharp: 'badge-csharp',
+    react: 'badge-react',
+    video: 'badge-video',
+    tool: 'badge-tool',
+    docs: 'badge-docs',
+    other: 'badge-other',
 };
 
 const ResourceCard = ({ resource, onEdit, onDelete }) => {
-    // Guard — never render with undefined data
     if (!resource) return null;
 
-    const formattedDate = resource.createdAt
-        ? new Date(resource.createdAt).toLocaleDateString('en-US', {
-            month: 'short', day: 'numeric', year: 'numeric',
-        })
-        : 'No date';
-
-    // API returns tags as a comma-separated string — split into array for rendering pills
     const tagList = resource.tags
-        ? resource.tags.split(',').map((t) => t.trim()).filter(Boolean)
+        ? resource.tags.split(',').map(t => t.trim()).filter(Boolean)
         : [];
 
-    return (
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 hover:border-slate-500 transition-all flex flex-col">
-            <div className="p-5 flex-1">
+    const badgeClass = TYPE_BADGE[resource.type?.toLowerCase()] || TYPE_BADGE.other;
 
-                {/* Header — title and type badge */}
-                <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-white text-sm leading-snug">{resource.title}</h3>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${TYPE_COLORS[resource.type] || TYPE_COLORS.other}`}>
-                        {resource.type}
-                    </span>
+    return (
+        <div className="rc-card">
+            <div className="rc-body">
+
+                {/* Header */}
+                <div className="rc-header">
+                    <h3 className="rc-title">{resource.title}</h3>
+                    <span className={`rc-badge ${badgeClass}`}>{resource.type}</span>
                 </div>
 
-                {/* Clickable URL — opens in new tab */}
-                <a
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2 break-all transition-colors block mb-3"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    {resource.url}
-                </a>
+                {/* URL / filepath */}
+                <p className="rc-filepath">{resource.url}</p>
 
-                {/* Optional notes */}
+                {/* Code block — shown if notes look like code, else plain notes */}
                 {resource.notes && (
-                    <p className="text-xs text-slate-400 line-clamp-2 mb-3">{resource.notes}</p>
-                )}
-
-                {/* Tag pills — split from comma-separated string */}
-                {tagList.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                        {tagList.map((tag, i) => (
-                            <span key={i} className="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded-full">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
+                    resource.notes.startsWith('import') || resource.notes.includes('{') ? (
+                        <div className="rc-code">
+                            <pre>{resource.notes}</pre>
+                        </div>
+                    ) : (
+                        <p className="rc-notes">{resource.notes}</p>
+                    )
                 )}
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-slate-700 flex items-center justify-between">
-                <span className="text-xs text-slate-500">{formattedDate}</span>
-                <div className="flex gap-2">
-                    <button
-                        onClick={onEdit}
-                        className="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded hover:bg-indigo-900/40 transition-colors"
-                    >
-                        Edit
+            <div className="rc-footer">
+                <div className="rc-tags">
+                    <span className="rc-tag">{tagList.join(', ')}</span>
+                </div>
+                <div className="rc-actions">
+                    <button className="rc-btn rc-btn-edit" onClick={onEdit} aria-label="Edit">
+                        <i className="ti ti-edit" />
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
-                    <button
-                        onClick={onDelete}
-                        className="text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-900/40 transition-colors"
-                    >
-                        Delete
+                    <button className="rc-btn rc-btn-delete" onClick={onDelete} aria-label="Delete">
+                        <i className="ti ti-trash" />
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path></svg>
                     </button>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
-
 export default ResourceCard;
