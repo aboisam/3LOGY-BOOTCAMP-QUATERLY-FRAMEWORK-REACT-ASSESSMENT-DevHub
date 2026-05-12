@@ -1,21 +1,7 @@
-// Displays a single task with status/priority badges and a quick status toggle
+import { Pencil, Trash2 } from 'lucide-react';
 import taskService from '../services/taskService';
 import toast from 'react-hot-toast';
 
-// Color maps for status and priority badges
-const STATUS_COLORS = {
-    'todo': 'bg-blue-900 text-blue-300',
-    'in-progress': 'bg-amber-900 text-amber-300',
-    'done': 'bg-green-900 text-green-300',
-};
-
-const PRIORITY_COLORS = {
-    'low': 'bg-slate-700 text-slate-300',
-    'medium': 'bg-yellow-900 text-yellow-300',
-    'high': 'bg-red-900 text-red-300',
-};
-
-// The next status in the cycle — clicking the badge advances the task forward
 const NEXT_STATUS = {
     'todo': 'in-progress',
     'in-progress': 'done',
@@ -28,15 +14,25 @@ const STATUS_LABELS = {
     'done': 'Done',
 };
 
+const TYPE_BADGE = {
+    'todo': 'badge-docs',
+    'in-progress': 'badge-react',
+    'done': 'badge-csharp',
+};
+
+const PRIORITY_BADGE = {
+    'low': 'badge-other',
+    'medium': 'badge-video',
+    'high': 'badge-tool',
+};
+
 const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
-    // Format due date — only shown when a due date exists
     const formattedDue = task.dueDate
         ? new Date(task.dueDate).toLocaleDateString('en-US', {
             month: 'short', day: 'numeric', year: 'numeric',
         })
         : null;
 
-    // Advance to the next status and notify the parent to update the list
     const handleStatusToggle = async () => {
         const nextStatus = NEXT_STATUS[task.status] || 'todo';
         try {
@@ -48,58 +44,66 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
         }
     };
 
+    const tagList = [
+        task.project && `📁 ${task.project}`,
+        formattedDue && `📅 ${formattedDue}`,
+    ].filter(Boolean);
+
+    const statusBadgeClass = TYPE_BADGE[task.status] || 'badge-other';
+    const priorityBadgeClass = PRIORITY_BADGE[task.priority] || 'badge-other';
+
     return (
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 hover:border-slate-500 transition-all flex flex-col">
-            <div className="p-5 flex-1">
+        <div className="rc-card">
+            <div className="rc-body">
 
-                {/* Title row */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                    <h3 className="font-semibold text-white text-sm leading-snug">{task.title}</h3>
-                    {/* Priority badge */}
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.medium}`}>
-                        {task.priority}
+                {/* Header */}
+                <div className="rc-header">
+                    <h3 className="rc-title">{task.title}</h3>
+                    <button
+                        onClick={handleStatusToggle}
+                        className={`rc-badge ${statusBadgeClass}`}
+                        title="Click to advance status"
+                    >
+                        {STATUS_LABELS[task.status] || task.status}
+                    </button>
+                </div>
+
+                {/* Priority shown where URL/filepath goes */}
+                <p className="rc-filepath">
+                    <span className={`rc-badge ${priorityBadgeClass}`}>
+                        {task.priority} priority
                     </span>
-                </div>
+                </p>
 
-                {/* Optional description */}
+                {/* Description shown as notes */}
                 {task.description && (
-                    <p className="text-xs text-slate-400 line-clamp-2 mb-3">{task.description}</p>
+                    <p className="rc-notes">{task.description}</p>
                 )}
-
-                {/* Status badge — clicking it cycles to the next status */}
-                <button
-                    onClick={handleStatusToggle}
-                    className={`text-xs font-medium px-3 py-1 rounded-full transition-opacity hover:opacity-80 mb-3 ${STATUS_COLORS[task.status] || STATUS_COLORS.todo}`}
-                    title="Click to advance status"
-                >
-                    {STATUS_LABELS[task.status] || task.status}
-                </button>
-
-                {/* Project and due date metadata */}
-                <div className="flex flex-wrap gap-3 text-xs text-slate-500">
-                    {task.project && (
-                        <span>📁 {task.project}</span>
-                    )}
-                    {formattedDue && (
-                        <span>📅 {formattedDue}</span>
-                    )}
-                </div>
             </div>
 
-            {/* Footer — edit and delete buttons */}
-            <div className="px-5 py-3 border-t border-slate-700 flex items-center justify-end gap-2">
-                <button
-                    onClick={onEdit}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded hover:bg-indigo-900/40 transition-colors"
-                >
-                    Edit
-                </button>
-                <button
-                    onClick={onDelete}
-                    className="text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-900/40 transition-colors"
-                >
-                    Delete
-                </button>
+            {/* Footer */}
+            <div className="rc-footer">
+                <div className="rc-tags">
+                    {tagList.length > 0 && (
+                        <span className="rc-tag">{tagList.join('  ·  ')}</span>
+                    )}
+                </div>
+                <div className="rc-actions">
+                    <button className="rc-btn rc-btn-edit" onClick={onEdit} aria-label="Edit">
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    <button className="rc-btn rc-btn-delete" onClick={onDelete} aria-label="Delete">
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path>
+                            <path d="M10 11v6M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     );

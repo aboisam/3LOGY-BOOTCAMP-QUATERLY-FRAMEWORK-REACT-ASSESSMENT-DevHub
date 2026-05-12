@@ -13,7 +13,6 @@ const ResourcesPage = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingResource, setEditingResource] = useState(null);
 
-    // Fetch resources once on mount
     useEffect(() => {
         const fetchResources = async () => {
             try {
@@ -88,30 +87,64 @@ const ResourcesPage = () => {
     };
 
     return (
-        // Full dark page background matching the mockup
-        <div className="min-h-screen bg-slate-900 px-4 sm:px-6 py-8">
-            <div className="max-w-6xl mx-auto">
+        // Matches the deep navy background from the mockup
+        <div
+            style={{
+                minHeight: '100vh',
+                backgroundColor: '#12151f',
+                padding: '40px 24px',
+            }}
+        >
+            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-                {/* Page header — "My Resources" title left, button right matching mockup */}
+                {/* Page header — bold "My Resources" left, pill button right */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '32px',
+                    }}
+                >
+                    <h1
+                        style={{
+                            fontSize: '28px',
+                            fontWeight: 800,
+                            color: '#ffffff',
+                            margin: 0,
+                            letterSpacing: '-0.01em',
+                        }}
+                    >
+                        My Resources
+                    </h1>
 
-
-
-
-                
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white">My Resources</h1>
                     {!showForm && (
                         <button
                             onClick={() => setShowForm(true)}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-900/40"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                backgroundColor: '#5457e5',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '10px 20px',
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'background-color 0.15s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#4446c9'}
+                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#5457e5'}
                         >
-                            <span className="text-lg leading-none">+</span>
+                            <span style={{ fontSize: '18px', lineHeight: 1, marginTop: '-1px' }}>+</span>
                             New Resource
                         </button>
                     )}
                 </div>
 
-                {/* Inline form — shown when creating or editing */}
+                {/* Inline form */}
                 {showForm && (
                     <ResourceForm
                         initialData={editingResource}
@@ -123,32 +156,59 @@ const ResourcesPage = () => {
 
                 {/* Loading spinner */}
                 {isLoading && (
-                    <div className="flex justify-center py-20">
-                        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+                        <div
+                            style={{
+                                width: '32px',
+                                height: '32px',
+                                border: '3px solid rgba(99,102,241,0.3)',
+                                borderTopColor: '#6366f1',
+                                borderRadius: '50%',
+                                animation: 'spin 0.7s linear infinite',
+                            }}
+                        />
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                 )}
 
                 {/* Error state */}
                 {error && !isLoading && (
-                    <div className="bg-red-900/30 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
+                    <div
+                        style={{
+                            backgroundColor: 'rgba(239,68,68,0.1)',
+                            border: '1px solid rgba(239,68,68,0.3)',
+                            color: '#fca5a5',
+                            borderRadius: '10px',
+                            padding: '12px 16px',
+                            fontSize: '14px',
+                        }}
+                    >
                         {error}
                     </div>
                 )}
 
-                {/* Empty state — matches the clean centered style */}
+                {/* Empty state */}
                 {!isLoading && !error && resources.length === 0 && (
-                    <div className="text-center py-24">
-                        <p className="text-5xl mb-4">🔖</p>
-                        <p className="text-white font-semibold text-lg mb-1">No resources yet</p>
-                        <p className="text-slate-400 text-sm">
+                    <div style={{ textAlign: 'center', padding: '96px 0' }}>
+                        <p style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</p>
+                        <p style={{ color: '#fff', fontWeight: 600, fontSize: '18px', marginBottom: '6px' }}>
+                            No resources yet
+                        </p>
+                        <p style={{ color: '#64748b', fontSize: '14px' }}>
                             Click "New Resource" to save your first link
                         </p>
                     </div>
                 )}
 
-                {/* Resource grid — 3 columns matching the snippet grid in the mockup */}
+                {/* Resource grid — 3 columns matching the snippet grid */}
                 {!isLoading && !error && resources.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                            gap: '20px',
+                        }}
+                    >
                         {resources.map((resource) => (
                             <ResourceCard
                                 key={resource.id}
