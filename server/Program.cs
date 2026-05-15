@@ -48,10 +48,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-            "http://localhost:5259",
-            "http://localhost:5173")
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+            "http://localhost:5173",                    // local dev
+            "https://devshelf-xyz.vercel.app"          // your Vercel URL
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
