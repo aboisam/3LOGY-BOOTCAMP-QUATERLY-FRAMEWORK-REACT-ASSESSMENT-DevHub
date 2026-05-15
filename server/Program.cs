@@ -4,20 +4,16 @@ using System.Text;
 using server.Data;
 using server.Services;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-//Add Ef core plus SQLite
+// Add EF Core plus SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=devshelf.db"));
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 
-//Read JWT configuration 
+// Read JWT configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -42,41 +38,52 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
+
 // Add CORS to allow frontend requests
+var allowedOrigins = new[]
+{
+    "http://localhost:5173",
+    "https://devshelf-6hxtsdhmp-aboi-samson-aboi-s-projects.vercel.app",
+    Environment.GetEnvironmentVariable("FRONTEND_URL") ?? ""
+};
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:5173",                    // local dev
-            "https://devshelf-xyz.vercel.app"          // your Vercel URL
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod();
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply database migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-app.UseHttpsRedirection();
+
+// ✅ CORS must come before everything else
 app.UseCors("AllowFrontend");
+
+// ✅ Remove HTTPS redirection — Render handles HTTPS externally
+// app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-
-
-
 app.Run();
-
