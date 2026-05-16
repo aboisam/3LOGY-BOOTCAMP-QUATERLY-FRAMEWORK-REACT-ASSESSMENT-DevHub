@@ -44,9 +44,9 @@ var allowedOrigins = new[]
 {
     "http://localhost:5173",
     "https://devshelf-6hxtsdhmp-aboi-samson-aboi-s-projects.vercel.app",
+    "https://devshelf-bjff9b317-aboi-samson-aboi-s-projects.vercel.app",
     Environment.GetEnvironmentVariable("FRONTEND_URL") ?? ""
 };
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
