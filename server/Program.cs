@@ -43,8 +43,7 @@ builder.Services.AddAuthentication("Bearer")
 var allowedOrigins = new[]
 {
     "http://localhost:5173",
-    "https://devshelf-6hxtsdhmp-aboi-samson-aboi-s-projects.vercel.app",
-    "https://devshelf-bjff9b317-aboi-samson-aboi-s-projects.vercel.app",
+    "https://devshelf-phi.vercel.app",
     Environment.GetEnvironmentVariable("FRONTEND_URL") ?? ""
 };
 builder.Services.AddCors(options =>
