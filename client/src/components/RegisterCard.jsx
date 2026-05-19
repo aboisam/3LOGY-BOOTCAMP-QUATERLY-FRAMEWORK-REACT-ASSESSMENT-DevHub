@@ -73,7 +73,7 @@ const Step = ({ icon, title, sub, active, done, showLine }) => (
 
 /* ── Field wrapper ── */
 const Field = ({ label, error, children }) => (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-[6px]">
         <label className="text-[10px] tracking-[0.14em] uppercase text-[#4a4a62] font-mono font-medium">
             {label}
         </label>
@@ -82,7 +82,8 @@ const Field = ({ label, error, children }) => (
     </div>
 );
 
-const inputBase = 'w-full bg-[#0e0e1a] border rounded-lg px-3.5 py-3 text-[13px] text-[#d4d0ff] font-mono outline-none transition-colors duration-150 focus:border-[#3d2fff]';
+/* ── Shared input classes ── */
+const inputBase = 'w-full bg-[#0e0e1a] border border-[#1e1e30] rounded-xl px-4 py-3 text-[13px] text-[#d4d0ff] font-mono outline-none transition-colors duration-150 focus:border-[#3d2fff]';
 
 /* ════════════════════════════════════════════ */
 const RegisterPage = () => {
@@ -95,7 +96,6 @@ const RegisterPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [agreed, setAgreed] = useState(false);
-    const [drawerOpen, setDrawerOpen] = useState(false);
 
     const passwordRules = [
         { label: '8+ chars', test: (p) => p.length >= 8 },
@@ -159,57 +159,14 @@ const RegisterPage = () => {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
                 @keyframes spin { to { transform: rotate(360deg); } }
-                input::placeholder { color: #2a2a42; }
+                input::placeholder { color: #2e2e48; }
+                * { box-sizing: border-box; }
             `}</style>
 
-            <div className="min-h-screen bg-[#080810] font-mono flex flex-col md:flex-row md:items-stretch">
+            <div className="min-h-screen bg-[#080810] font-mono flex flex-col md:flex-row">
 
-                {/* ════ MOBILE TOP BAR ════ */}
-                <header className="md:hidden sticky top-0 z-30 bg-[#0c0c16] border-b border-[#14142a]">
-                    <div className="flex items-center justify-between px-5 py-3">
-                        <div className="flex items-center gap-2.5">
-                            <LogoMark />
-                            <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                            {[0, 1, 2].map(i => (
-                                <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'w-6 bg-[#3d2fff]' : 'w-3 bg-[#1e1e30]'}`} />
-                            ))}
-                            <span className="text-[10px] text-[#4a4a62] ml-1">1/3</span>
-                        </div>
-
-                        <button
-                            onClick={() => setDrawerOpen(v => !v)}
-                            className="text-[#4a4a62] hover:text-[#c8c4ff] transition-colors p-1.5 rounded-lg hover:bg-[#1a1a2c] bg-transparent border-none cursor-pointer"
-                            aria-label="Toggle steps"
-                        >
-                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                {drawerOpen
-                                    ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
-                            </svg>
-                        </button>
-                    </div>
-
-                    {/* Inline drawer */}
-                    {drawerOpen && (
-                        <div className="bg-[#0a0a14] border-t border-[#14142a] px-5 py-5">
-                            <div className="flex flex-col mb-4">
-                                {stepsData.map((s, i) => (
-                                    <Step key={s.title} {...s} showLine={i < stepsData.length - 1} />
-                                ))}
-                            </div>
-                            <div className="pt-4 border-t border-[#14142a]">
-                                <div className="text-[11px] text-[#2a2a40]">Already on DevShelf?</div>
-                                <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
-                            </div>
-                        </div>
-                    )}
-                </header>
-
-                {/* ════ DESKTOP SIDEBAR ════ */}
-                <aside className="hidden md:flex flex-col w-60 shrink-0 bg-[#0c0c16] border-r border-[#14142a] px-6 py-8">
+                {/* ════ DESKTOP SIDEBAR — hidden on mobile ════ */}
+                <aside className="hidden md:flex flex-col w-60 shrink-0 bg-[#0c0c16] border-r border-[#14142a] px-6 py-8 min-h-screen">
                     <div className="flex items-center gap-2.5 mb-12">
                         <LogoMark />
                         <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
@@ -226,39 +183,52 @@ const RegisterPage = () => {
                 </aside>
 
                 {/* ════ MAIN CONTENT ════ */}
-                <main className="flex-1 flex flex-col overflow-y-auto px-5 pt-8 pb-12 sm:px-8 md:px-10 md:pt-11 lg:px-14">
-
-                    <p className="text-[10px] tracking-[0.18em] text-[#3d2fff] uppercase mb-3">
+                <main className="flex-1 flex flex-col min-h-screen
+                    px-5 pt-8 pb-10
+                    md:px-10 md:pt-11 md:pb-12
+                    lg:px-14
+                ">
+                    {/* ── Eyebrow ── */}
+                    <p className="text-[10px] tracking-[0.18em] text-[#3d2fff] uppercase mb-4 font-mono">
                         Step 1 of 3
                     </p>
 
-                    <h1 className="text-[26px] sm:text-3xl lg:text-[32px] font-semibold text-[#e0dcff] leading-tight mb-2 tracking-tight">
-                        Create your account{' '}
-                        <span className="inline-block text-[11px] font-normal align-middle bg-[#1a1730] text-[#7b78ff] border border-[#2d2860] rounded-[5px] px-2 py-0.5 tracking-[0.06em] ml-1">
+                    {/* ── Title ── */}
+                    <h1 className="font-mono font-semibold text-[#e0dcff] leading-[1.1] tracking-tight mb-2
+                        text-[36px]
+                        sm:text-[40px]
+                        md:text-[32px]
+                    ">
+                        Create your<br />account{' '}
+                        <span className="inline-block text-[11px] font-normal align-middle
+                            bg-[#1a1730] text-[#7b78ff] border border-[#2d2860]
+                            rounded-[5px] px-2 py-[3px] tracking-[0.06em] ml-1.5">
                             Free
                         </span>
                     </h1>
-                    <p className="text-[12px] text-[#3a3a52] mb-7">
+
+                    <p className="text-[12px] text-[#3a3a52] mb-8 font-mono">
                         Start organizing your dev resources in minutes.
                     </p>
 
+                    {/* ── FORM ── */}
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-lg">
 
-                        {/* Full Name + Username: stack on mobile → 2-col on sm+ */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Full Name + Username — 2-col on all sizes to match screenshot */}
+                        <div className="grid grid-cols-2 gap-3">
                             <Field label="Full Name" error={errors.userName}>
                                 <input
                                     name="userName" type="text" autoComplete="name"
                                     placeholder="John Doe"
                                     value={formData.userName} onChange={handleChange}
-                                    className={`${inputBase} ${errors.userName ? 'border-[#6a2222]' : 'border-[#1e1e30]'}`}
+                                    className={`${inputBase} ${errors.userName ? '!border-[#6a2222]' : ''}`}
                                 />
                             </Field>
                             <Field label="Username">
                                 <input
                                     name="username" type="text" autoComplete="username"
                                     placeholder="johndoe"
-                                    className={`${inputBase} border-[#1e1e30]`}
+                                    className={inputBase}
                                 />
                             </Field>
                         </div>
@@ -269,7 +239,7 @@ const RegisterPage = () => {
                                 name="email" type="email" autoComplete="email"
                                 placeholder="you@example.com"
                                 value={formData.email} onChange={handleChange}
-                                className={`${inputBase} ${errors.email ? 'border-[#6a2222]' : 'border-[#1e1e30]'}`}
+                                className={`${inputBase} ${errors.email ? '!border-[#6a2222]' : ''}`}
                             />
                         </Field>
 
@@ -280,11 +250,11 @@ const RegisterPage = () => {
                                     name="password" type={showPassword ? 'text' : 'password'}
                                     autoComplete="new-password" placeholder="min. 8 characters"
                                     value={formData.password} onChange={handleChange}
-                                    className={`${inputBase} pr-10 ${errors.password ? 'border-[#6a2222]' : 'border-[#1e1e30]'}`}
+                                    className={`${inputBase} pr-11 ${errors.password ? '!border-[#6a2222]' : ''}`}
                                 />
                                 <button type="button" tabIndex={-1}
                                     onClick={() => setShowPassword(v => !v)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45455a] hover:text-[#7a7a99] bg-transparent border-none cursor-pointer flex p-0">
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#45455a] hover:text-[#7a7a99] bg-transparent border-none cursor-pointer flex items-center p-0 transition-colors">
                                     {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                                 </button>
                             </div>
@@ -311,14 +281,14 @@ const RegisterPage = () => {
                                     name="confirmPassword" type={showConfirm ? 'text' : 'password'}
                                     autoComplete="new-password" placeholder="repeat password"
                                     value={formData.confirmPassword} onChange={handleChange}
-                                    className={`${inputBase} pr-10
-                                        ${errors.confirmPassword ? 'border-[#6a2222]'
-                                            : passwordsMatch ? 'border-[#2a5c45]'
-                                                : 'border-[#1e1e30]'}`}
+                                    className={`${inputBase} pr-11
+                                        ${errors.confirmPassword ? '!border-[#6a2222]'
+                                            : passwordsMatch ? '!border-[#2a5c45]'
+                                                : ''}`}
                                 />
                                 <button type="button" tabIndex={-1}
                                     onClick={() => setShowConfirm(v => !v)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45455a] hover:text-[#7a7a99] bg-transparent border-none cursor-pointer flex p-0">
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#45455a] hover:text-[#7a7a99] bg-transparent border-none cursor-pointer flex items-center p-0 transition-colors">
                                     {showConfirm ? <EyeIcon /> : <EyeOffIcon />}
                                 </button>
                             </div>
@@ -333,18 +303,18 @@ const RegisterPage = () => {
                         </Field>
 
                         {/* Terms */}
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                             <div className="flex items-start gap-3">
                                 <div
                                     onClick={() => { setAgreed(v => !v); setErrors(e => ({ ...e, agreed: '' })); }}
-                                    className={`w-4 h-4 rounded shrink-0 mt-0.5 flex items-center justify-center cursor-pointer border transition-all duration-150
+                                    className={`w-[18px] h-[18px] rounded-[4px] shrink-0 mt-0.5 flex items-center justify-center cursor-pointer border transition-all duration-150
                                         ${agreed ? 'bg-[#3d2fff] border-[#3d2fff]'
                                             : errors.agreed ? 'bg-[#0e0e1a] border-[#6a2222]'
                                                 : 'bg-[#0e0e1a] border-[#2a2a40]'}`}
                                 >
                                     {agreed && <CheckIcon />}
                                 </div>
-                                <span className="text-[11px] text-[#45455a] leading-relaxed">
+                                <span className="text-[11px] text-[#45455a] leading-[1.7] font-mono">
                                     I agree to the{' '}
                                     <Link to="/terms" className="text-[#7b78ff] underline underline-offset-2">Terms of Service</Link>
                                     {' '}and{' '}
@@ -353,16 +323,16 @@ const RegisterPage = () => {
                                 </span>
                             </div>
                             {errors.agreed && (
-                                <p className="text-[11px] text-[#e05555] m-0 ml-7 font-mono">{errors.agreed}</p>
+                                <p className="text-[11px] text-[#e05555] m-0 ml-[30px] font-mono">{errors.agreed}</p>
                             )}
                         </div>
 
                         {/* Submit */}
                         <button
                             type="submit" disabled={isSubmitting}
-                            className={`w-full bg-[#3d2fff] hover:bg-[#5548ff] border border-[#3d2fff] rounded-lg
-                                py-3.5 text-[13px] font-medium text-white font-mono tracking-[0.04em]
-                                transition-all duration-150 active:scale-[0.99]
+                            className={`w-full bg-[#3d2fff] hover:bg-[#5548ff] border border-[#3d2fff] rounded-xl
+                                py-[14px] text-[13px] font-medium text-white font-mono tracking-[0.04em]
+                                transition-all duration-150 active:scale-[0.99] mt-1
                                 ${isSubmitting ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                             {isSubmitting
@@ -377,13 +347,13 @@ const RegisterPage = () => {
                     {/* Divider */}
                     <div className="flex items-center gap-3 my-6 w-full max-w-lg">
                         <div className="flex-1 h-px bg-[#14142a]" />
-                        <span className="text-[10px] text-[#2a2a40] tracking-[0.1em] uppercase whitespace-nowrap">
+                        <span className="text-[10px] text-[#2a2a40] tracking-[0.1em] uppercase whitespace-nowrap font-mono">
                             or sign up with
                         </span>
                         <div className="flex-1 h-px bg-[#14142a]" />
                     </div>
 
-                    {/* OAuth — "Coming Soon" toast until backend OAuth is wired up */}
+                    {/* OAuth buttons */}
                     <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
                         {[
                             { icon: <GithubIcon />, label: 'GitHub' },
@@ -393,7 +363,7 @@ const RegisterPage = () => {
                                 key={label} type="button"
                                 onClick={() => toast(`${label} sign-up coming soon!`, { icon: '🔒' })}
                                 className="flex items-center justify-center gap-2 bg-[#0e0e1a] border border-[#1e1e30]
-                                    rounded-lg py-3 text-[12px] text-[#7a7a99] font-mono
+                                    rounded-xl py-3 text-[12px] text-[#7a7a99] font-mono
                                     hover:border-[#3a3a55] hover:text-[#a0a0c0] hover:bg-[#13131e]
                                     transition-all duration-150 cursor-pointer"
                             >
@@ -404,7 +374,7 @@ const RegisterPage = () => {
                     </div>
 
                     {/* Sign-in link */}
-                    <p className="text-[11px] text-[#35354a] mt-6 w-full max-w-lg">
+                    <p className="text-[11px] text-[#35354a] mt-6 w-full max-w-lg font-mono">
                         Already have an account?{' '}
                         <Link to="/login" className="text-[#7b78ff] no-underline font-medium hover:text-[#9d9bff] transition-colors">
                             Sign in
