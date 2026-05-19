@@ -3,11 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
-/* ── SVG Icons ── */
+/* ── Icons ── */
 const EyeIcon = () => (
     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
     </svg>
 );
 const EyeOffIcon = () => (
@@ -37,7 +36,8 @@ const GoogleIcon = () => (
 );
 
 const LogoMark = () => (
-    <div className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(61,47,255,0.45)]">
+    <div style={{ boxShadow: '0 0 16px rgba(61,47,255,0.4)' }}
+        className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2.2">
             <rect x="2" y="3" width="7" height="7" rx="1" />
             <rect x="15" y="3" width="7" height="7" rx="1" />
@@ -47,90 +47,69 @@ const LogoMark = () => (
     </div>
 );
 
-/* ── Sidebar step item ── */
+/* ── Sidebar Step ── */
 const Step = ({ icon, title, sub, active, done, showLine }) => (
     <div>
         <div className="flex items-start gap-3">
-            <div className={`
-                w-7 h-7 rounded-lg shrink-0 mt-0.5 flex items-center justify-center
-                border text-[12px] transition-all duration-200
-                ${active
-                    ? 'bg-[#3d2fff] border-[#3d2fff] text-white shadow-[0_0_10px_rgba(61,47,255,0.4)]'
-                    : done
-                        ? 'bg-[#0d2018] border-[#2a5c45] text-[#4ecb8a]'
-                        : 'bg-transparent border-[#1a1a2c] text-[#2e2e48]'
-                }
-            `}>
+            <div className={[
+                'w-7 h-7 rounded-lg shrink-0 mt-0.5 flex items-center justify-center border text-xs transition-all duration-200',
+                active ? 'bg-[#3d2fff] border-[#3d2fff] text-white' : '',
+                done ? 'bg-[#0d2018] border-[#2a5c45] text-[#4ecb8a]' : '',
+                !active && !done ? 'bg-transparent border-[#1c1c30] text-[#2a2a40]' : '',
+            ].join(' ')}>
                 {icon}
             </div>
-            <div className="flex flex-col gap-0.5">
-                <span className={`text-[12px] font-medium leading-none font-mono
-                    ${active ? 'text-[#c8c4ff]' : done ? 'text-[#4ecb8a]' : 'text-[#2e2e48]'}`}>
-                    {title}
-                </span>
-                <span className={`text-[11px] font-mono
-                    ${active ? 'text-[#555570]' : 'text-[#22223a]'}`}>
-                    {sub}
-                </span>
+            <div>
+                <p className={[
+                    'text-[12px] font-medium font-mono leading-tight',
+                    active ? 'text-[#c8c4ff]' : done ? 'text-[#4ecb8a]' : 'text-[#2a2a40]',
+                ].join(' ')}>{title}</p>
+                <p className={[
+                    'text-[11px] font-mono mt-0.5',
+                    active ? 'text-[#50506a]' : 'text-[#1e1e30]',
+                ].join(' ')}>{sub}</p>
             </div>
         </div>
-        {showLine && (
-            <div className="w-px h-5 bg-[#14142a] ml-[13px] my-1" />
-        )}
+        {showLine && <div className="w-px h-5 bg-[#14142a] ml-3.5 my-1" />}
     </div>
 );
 
-/* ── Field wrapper ── */
+/* ── Field ── */
 const Field = ({ label, error, children }) => (
     <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] tracking-[0.12em] uppercase text-[#3d3d58] font-mono font-medium select-none">
+        <label className="text-[10px] tracking-[0.12em] uppercase text-[#38385a] font-mono font-medium select-none">
             {label}
         </label>
         {children}
-        {error && (
-            <p className="text-[11px] text-[#d95555] font-mono leading-none mt-0.5">
-                {error}
-            </p>
-        )}
+        {error && <p className="text-[11px] text-[#d95555] font-mono mt-0.5">{error}</p>}
     </div>
 );
 
-/* ── Shared input base ── */
-const inputBase = [
-    'w-full bg-[#0a0a14] border border-[#1a1a2c] rounded-xl',
-    'px-4 py-[11px] text-[13px] text-[#d4d0ff] font-mono',
-    'outline-none placeholder:text-[#28283e]',
-    'transition-colors duration-150',
-    'focus:border-[#3d2fff] focus:shadow-[0_0_0_3px_rgba(61,47,255,0.12)]',
-    'hover:border-[#252540]',
+/* ── Input base styles ── */
+const inputCls = (hasError, isValid) => [
+    'w-full bg-[#0a0a16] border rounded-xl px-4 py-[11px]',
+    'text-[13px] text-[#d4d0ff] font-mono outline-none',
+    'placeholder:text-[#252538]',
+    'transition-all duration-150',
+    'hover:border-[#252545]',
+    'focus:shadow-[0_0_0_3px_rgba(61,47,255,0.15)]',
+    hasError ? 'border-[#5c1e1e] focus:border-[#5c1e1e]' : '',
+    isValid ? 'border-[#1f4d38] focus:border-[#1f4d38] focus:shadow-[0_0_0_3px_rgba(78,203,138,0.1)]' : '',
+    !hasError && !isValid ? 'border-[#1c1c30] focus:border-[#3d2fff]' : '',
 ].join(' ');
 
 const stepsData = [
     {
         title: 'Account', sub: 'Name & email', active: true,
-        icon: (
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-            </svg>
-        ),
+        icon: <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
     },
     {
         title: 'Security', sub: 'Set a password',
-        icon: (
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-            </svg>
-        ),
+        icon: <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>,
     },
     {
         title: 'Confirm', sub: 'Review & submit',
-        icon: (
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-        ),
+        icon: <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>,
     },
 ];
 
@@ -147,12 +126,12 @@ const RegisterPage = () => {
     const [agreed, setAgreed] = useState(false);
 
     const passwordRules = [
-        { label: '8+ chars', test: (p) => p.length >= 8 },
-        { label: 'uppercase', test: (p) => /[A-Z]/.test(p) },
-        { label: 'number', test: (p) => /[0-9]/.test(p) },
+        { label: '8+ chars', test: p => p.length >= 8 },
+        { label: 'uppercase', test: p => /[A-Z]/.test(p) },
+        { label: 'number', test: p => /[0-9]/.test(p) },
     ];
 
-    const handleChange = (e) => {
+    const handleChange = e => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setErrors({ ...errors, [e.target.name]: '' });
     };
@@ -170,10 +149,10 @@ const RegisterPage = () => {
         return e;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async e => {
         e.preventDefault();
-        const validationErrors = validate();
-        if (Object.keys(validationErrors).length > 0) { setErrors(validationErrors); return; }
+        const ve = validate();
+        if (Object.keys(ve).length) { setErrors(ve); return; }
         try {
             setIsSubmitting(true);
             await register(formData.userName, formData.email, formData.password);
@@ -189,100 +168,117 @@ const RegisterPage = () => {
     const passwordsMatch = formData.confirmPassword && formData.password === formData.confirmPassword;
 
     return (
-        <div className="min-h-screen bg-[#07070f] font-mono flex flex-col md:flex-row">
+        /*
+         * ROOT: full-screen, row on md+
+         * Key fix: overflow-hidden keeps the sidebar from growing the page width
+         */
+        <div className="min-h-screen w-full overflow-hidden bg-[#07070f] font-mono flex flex-col md:flex-row">
 
-            {/* ════ MOBILE TOP BAR — visible only on mobile ════ */}
-            <header className="md:hidden flex items-center justify-between
-                px-5 py-4 border-b border-[#12122a] bg-[#07070f] sticky top-0 z-10">
+            {/* ══════════════════════════════════════
+                MOBILE TOP BAR  (hidden on md+)
+            ══════════════════════════════════════ */}
+            <header className="flex md:hidden items-center justify-between
+                px-5 h-14 shrink-0
+                bg-[#09090f] border-b border-[#131326]
+                sticky top-0 z-20">
                 <div className="flex items-center gap-2.5">
                     <LogoMark />
                     <span className="text-[14px] font-medium text-[#d0ccff] tracking-wide">DevShelf</span>
                 </div>
-                {/* Step pills on mobile */}
+                {/* Step progress dots */}
                 <div className="flex items-center gap-1.5">
-                    {stepsData.map((s, i) => (
-                        <div key={i} className={`
-                            w-6 h-1.5 rounded-full transition-all duration-300
-                            ${i === 0 ? 'bg-[#3d2fff]' : 'bg-[#1a1a2c]'}
-                        `} />
+                    {stepsData.map((_, i) => (
+                        <div key={i} className={[
+                            'h-1.5 rounded-full transition-all duration-300',
+                            i === 0 ? 'w-5 bg-[#3d2fff]' : 'w-1.5 bg-[#1c1c30]',
+                        ].join(' ')} />
                     ))}
                 </div>
             </header>
 
-            {/* ════ DESKTOP SIDEBAR — hidden on mobile ════ */}
-            <aside className="hidden md:flex flex-col w-56 shrink-0
-                bg-[#0a0a14] border-r border-[#12122a]
-                px-6 py-8 sticky top-0 h-screen">
+            {/* ══════════════════════════════════════
+                DESKTOP SIDEBAR  (hidden below md)
+                - fixed width 224px
+                - sticky so it doesn't scroll away
+            ══════════════════════════════════════ */}
+            <aside className="hidden md:flex flex-col
+                w-56 shrink-0
+                bg-[#09090f] border-r border-[#131326]
+                sticky top-0 self-start h-screen
+                px-6 py-8">
 
                 {/* Brand */}
                 <div className="flex items-center gap-2.5 mb-10">
                     <LogoMark />
-                    <span className="text-[14px] font-medium text-[#d0ccff] tracking-[0.05em]">DevShelf</span>
+                    <span className="text-[14px] font-medium text-[#d0ccff] tracking-[0.04em]">DevShelf</span>
                 </div>
 
                 {/* Steps */}
-                <nav className="flex flex-col">
+                <nav className="flex flex-col gap-0">
                     {stepsData.map((s, i) => (
                         <Step key={s.title} {...s} showLine={i < stepsData.length - 1} />
                     ))}
                 </nav>
 
-                {/* Footer */}
-                <div className="mt-auto pt-6 border-t border-[#12122a] flex flex-col gap-1">
-                    <span className="text-[11px] text-[#22223a] font-mono">Already on DevShelf?</span>
-                    <Link to="/login" className="text-[12px] text-[#5548ff] no-underline hover:text-[#7b6fff] transition-colors">
+                {/* Bottom link */}
+                <div className="mt-auto pt-5 border-t border-[#131326]">
+                    <p className="text-[11px] text-[#1e1e30] font-mono mb-1">Already on DevShelf?</p>
+                    <Link to="/login"
+                        className="text-[12px] text-[#5548ff] no-underline hover:text-[#7b6fff] transition-colors">
                         Sign in →
                     </Link>
                 </div>
             </aside>
 
-            {/* ════ MAIN CONTENT ════ */}
-            <main className="flex-1 flex flex-col
-                px-5 py-8
-                sm:px-8 sm:py-10
+            {/* ══════════════════════════════════════
+                MAIN — takes remaining width
+                Centered content, max-width on form
+            ══════════════════════════════════════ */}
+            <main className="flex-1 min-w-0 flex flex-col justify-start
+                px-6 py-8
+                sm:px-10 sm:py-10
                 md:px-12 md:py-12
-                lg:px-16 lg:py-14
-                xl:px-20
-            ">
-                {/* ── Eyebrow ── */}
-                <p className="text-[10px] tracking-[0.2em] text-[#3d2fff] uppercase mb-3 font-mono font-medium">
+                lg:px-16 lg:py-14">
+
+                {/* Eyebrow */}
+                <p className="text-[10px] tracking-[0.2em] font-medium uppercase text-[#3d2fff] font-mono mb-3">
                     Step 1 of 3
                 </p>
 
-                {/* ── Title ── */}
-                <h1 className="font-mono font-semibold text-[#e0dcff] leading-[1.08] tracking-tight mb-2
-                    text-[28px] sm:text-[34px] md:text-[30px] lg:text-[36px]">
+                {/* Heading */}
+                <h1 className="font-mono font-semibold text-[#e2deff] leading-[1.08] tracking-tight mb-2
+                    text-[28px] sm:text-[32px] lg:text-[38px]">
                     Create your<br />account{' '}
-                    <span className="inline-block align-middle
+                    <span className="inline-block align-middle ml-2
                         text-[10px] font-normal tracking-[0.08em]
-                        bg-[#18143a] text-[#7b78ff] border border-[#2a2560]
-                        rounded-[5px] px-2 py-[3px] ml-1.5">
+                        bg-[#17133a] text-[#7b78ff] border border-[#27236a]
+                        rounded-[5px] px-2 py-[3px]">
                         Free
                     </span>
                 </h1>
 
-                <p className="text-[12px] text-[#35354e] mb-8 font-mono leading-relaxed">
+                <p className="text-[12px] text-[#35354e] font-mono mb-8 leading-relaxed">
                     Start organizing your dev resources in minutes.
                 </p>
 
-                {/* ── FORM ── */}
+                {/* ── FORM — max-w-md keeps it readable, not stretched ── */}
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
 
-                    {/* Full Name + Username */}
+                    {/* Row: Full Name + Username */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Field label="Full Name" error={errors.userName}>
                             <input
                                 name="userName" type="text" autoComplete="name"
                                 placeholder="John Doe"
                                 value={formData.userName} onChange={handleChange}
-                                className={`${inputBase} ${errors.userName ? '!border-[#5c1e1e] focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]' : ''}`}
+                                className={inputCls(!!errors.userName, false)}
                             />
                         </Field>
                         <Field label="Username">
                             <input
                                 name="username" type="text" autoComplete="username"
                                 placeholder="johndoe"
-                                className={inputBase}
+                                className={inputCls(false, false)}
                             />
                         </Field>
                     </div>
@@ -293,7 +289,7 @@ const RegisterPage = () => {
                             name="email" type="email" autoComplete="email"
                             placeholder="you@example.com"
                             value={formData.email} onChange={handleChange}
-                            className={`${inputBase} ${errors.email ? '!border-[#5c1e1e] focus:shadow-[0_0_0_3px_rgba(220,38,38,0.1)]' : ''}`}
+                            className={inputCls(!!errors.email, false)}
                         />
                     </Field>
 
@@ -304,33 +300,29 @@ const RegisterPage = () => {
                                 name="password" type={showPassword ? 'text' : 'password'}
                                 autoComplete="new-password" placeholder="min. 8 characters"
                                 value={formData.password} onChange={handleChange}
-                                className={`${inputBase} pr-11 ${errors.password ? '!border-[#5c1e1e]' : ''}`}
+                                className={inputCls(!!errors.password, false) + ' pr-11'}
                             />
-                            <button
-                                type="button" tabIndex={-1}
+                            <button type="button" tabIndex={-1}
                                 onClick={() => setShowPassword(v => !v)}
                                 className="absolute right-3.5 top-1/2 -translate-y-1/2
-                                    text-[#35354e] hover:text-[#6a6a88]
-                                    bg-transparent border-none cursor-pointer p-0
-                                    flex items-center transition-colors duration-150"
-                            >
+                                    text-[#35354e] hover:text-[#7070a0]
+                                    bg-transparent border-none p-0 cursor-pointer
+                                    flex items-center transition-colors duration-150">
                                 {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
-                        {/* Password strength pills */}
+                        {/* Strength pills */}
                         {formData.password && (
                             <div className="flex gap-1.5 flex-wrap mt-2">
                                 {passwordRules.map((rule, i) => {
                                     const ok = rule.test(formData.password);
                                     return (
-                                        <span key={i} className={`
-                                            text-[10px] px-2.5 py-[3px] rounded-full font-mono
-                                            border transition-all duration-200 leading-none
-                                            ${ok
-                                                ? 'border-[#1f4d38] text-[#4ecb8a] bg-[#091a10]'
-                                                : 'border-[#18182c] text-[#2e2e48] bg-transparent'
-                                            }`}>
-                                            {ok ? '✓ ' : ''}{rule.label}
+                                        <span key={i} className={[
+                                            'text-[10px] px-2.5 py-[3px] rounded-full font-mono border transition-all duration-200',
+                                            ok ? 'border-[#1f4d38] text-[#4ecb8a] bg-[#091a10]'
+                                                : 'border-[#1c1c30] text-[#2e2e48] bg-transparent',
+                                        ].join(' ')}>
+                                            {ok && '✓ '}{rule.label}
                                         </span>
                                     );
                                 })}
@@ -345,22 +337,14 @@ const RegisterPage = () => {
                                 name="confirmPassword" type={showConfirm ? 'text' : 'password'}
                                 autoComplete="new-password" placeholder="repeat password"
                                 value={formData.confirmPassword} onChange={handleChange}
-                                className={`${inputBase} pr-11
-                                    ${errors.confirmPassword
-                                        ? '!border-[#5c1e1e]'
-                                        : passwordsMatch
-                                            ? '!border-[#1f4d38] focus:shadow-[0_0_0_3px_rgba(78,203,138,0.1)]'
-                                            : ''
-                                    }`}
+                                className={inputCls(!!errors.confirmPassword, passwordsMatch) + ' pr-11'}
                             />
-                            <button
-                                type="button" tabIndex={-1}
+                            <button type="button" tabIndex={-1}
                                 onClick={() => setShowConfirm(v => !v)}
                                 className="absolute right-3.5 top-1/2 -translate-y-1/2
-                                    text-[#35354e] hover:text-[#6a6a88]
-                                    bg-transparent border-none cursor-pointer p-0
-                                    flex items-center transition-colors duration-150"
-                            >
+                                    text-[#35354e] hover:text-[#7070a0]
+                                    bg-transparent border-none p-0 cursor-pointer
+                                    flex items-center transition-colors duration-150">
                                 {showConfirm ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
@@ -375,32 +359,30 @@ const RegisterPage = () => {
                         )}
                     </Field>
 
-                    {/* Terms checkbox */}
+                    {/* Terms */}
                     <div className="flex flex-col gap-1">
                         <div className="flex items-start gap-3">
                             <button
                                 type="button"
                                 onClick={() => { setAgreed(v => !v); setErrors(e => ({ ...e, agreed: '' })); }}
-                                className={`
-                                    w-[18px] h-[18px] rounded-[4px] shrink-0 mt-0.5
-                                    flex items-center justify-center
-                                    border transition-all duration-150 cursor-pointer
-                                    ${agreed
-                                        ? 'bg-[#3d2fff] border-[#3d2fff] shadow-[0_0_8px_rgba(61,47,255,0.35)]'
+                                aria-label="Agree to terms"
+                                className={[
+                                    'w-[18px] h-[18px] rounded-[4px] shrink-0 mt-0.5',
+                                    'flex items-center justify-center',
+                                    'border transition-all duration-150 cursor-pointer',
+                                    agreed
+                                        ? 'bg-[#3d2fff] border-[#3d2fff]'
                                         : errors.agreed
                                             ? 'bg-transparent border-[#5c1e1e]'
-                                            : 'bg-transparent border-[#22223a] hover:border-[#3d2fff]'
-                                    }`}
-                                aria-label="Agree to terms"
-                            >
+                                            : 'bg-transparent border-[#222240] hover:border-[#3d2fff]',
+                                ].join(' ')}>
                                 {agreed && <CheckIcon />}
                             </button>
-                            <span className="text-[11px] text-[#3d3d58] leading-[1.75] font-mono">
+                            <span className="text-[11px] text-[#3d3d58] font-mono leading-[1.75]">
                                 I agree to the{' '}
                                 <Link to="/terms" className="text-[#7b78ff] underline underline-offset-2 hover:text-[#9d9bff] transition-colors">
                                     Terms of Service
-                                </Link>
-                                {' '}and{' '}
+                                </Link>{' '}and{' '}
                                 <Link to="/privacy" className="text-[#7b78ff] underline underline-offset-2 hover:text-[#9d9bff] transition-colors">
                                     Privacy Policy
                                 </Link>.
@@ -408,69 +390,61 @@ const RegisterPage = () => {
                             </span>
                         </div>
                         {errors.agreed && (
-                            <p className="text-[11px] text-[#d95555] font-mono ml-[30px] leading-none">
-                                {errors.agreed}
-                            </p>
+                            <p className="text-[11px] text-[#d95555] font-mono ml-[30px]">{errors.agreed}</p>
                         )}
                     </div>
 
                     {/* Submit */}
                     <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`
-                            w-full rounded-xl py-[13px] mt-1
-                            text-[13px] font-medium text-white font-mono tracking-[0.05em]
-                            border border-[#3d2fff]
-                            transition-all duration-150 active:scale-[0.99]
-                            ${isSubmitting
-                                ? 'bg-[#3d2fff] opacity-50 cursor-not-allowed'
-                                : 'bg-[#3d2fff] hover:bg-[#5548ff] hover:border-[#5548ff] cursor-pointer shadow-[0_4px_20px_rgba(61,47,255,0.35)] hover:shadow-[0_4px_24px_rgba(61,47,255,0.5)]'
-                            }`}
-                    >
+                        type="submit" disabled={isSubmitting}
+                        style={{ boxShadow: isSubmitting ? 'none' : '0 4px 20px rgba(61,47,255,0.4)' }}
+                        className={[
+                            'w-full rounded-xl py-[13px] mt-1',
+                            'text-[13px] font-medium text-white font-mono tracking-[0.05em]',
+                            'border border-[#3d2fff] bg-[#3d2fff]',
+                            'transition-all duration-150 active:scale-[0.99]',
+                            isSubmitting
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'cursor-pointer hover:bg-[#5548ff] hover:border-[#5548ff]',
+                        ].join(' ')}>
                         {isSubmitting ? (
                             <span className="flex items-center justify-center gap-2">
                                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 Creating account...
                             </span>
-                        ) : (
-                            'Continue →'
-                        )}
+                        ) : 'Continue →'}
                     </button>
                 </form>
 
-                {/* ── Divider ── */}
+                {/* Divider */}
                 <div className="flex items-center gap-3 my-5 w-full max-w-md">
-                    <div className="flex-1 h-px bg-[#12122a]" />
-                    <span className="text-[10px] text-[#22223a] tracking-[0.12em] uppercase font-mono whitespace-nowrap">
+                    <div className="flex-1 h-px bg-[#131326]" />
+                    <span className="text-[10px] text-[#1e1e32] tracking-[0.12em] uppercase font-mono whitespace-nowrap">
                         or sign up with
                     </span>
-                    <div className="flex-1 h-px bg-[#12122a]" />
+                    <div className="flex-1 h-px bg-[#131326]" />
                 </div>
 
-                {/* ── OAuth buttons ── */}
+                {/* OAuth */}
                 <div className="grid grid-cols-2 gap-3 w-full max-w-md">
                     {[
                         { icon: <GithubIcon />, label: 'GitHub' },
                         { icon: <GoogleIcon />, label: 'Google' },
                     ].map(({ icon, label }) => (
-                        <button
-                            key={label} type="button"
+                        <button key={label} type="button"
                             onClick={() => toast(`${label} sign-up coming soon!`, { icon: '🔒' })}
                             className="flex items-center justify-center gap-2
-                                bg-[#0a0a14] border border-[#1a1a2c] rounded-xl
-                                py-2.5 text-[12px] text-[#55556e] font-mono
-                                hover:border-[#2e2e48] hover:text-[#9090b0] hover:bg-[#0e0e1c]
-                                transition-all duration-150 cursor-pointer"
-                        >
-                            {icon}
-                            {label}
+                                bg-[#0a0a16] border border-[#1c1c30] rounded-xl
+                                py-[10px] text-[12px] text-[#50506a] font-mono
+                                hover:border-[#2e2e50] hover:text-[#9090b8] hover:bg-[#0e0e1c]
+                                transition-all duration-150 cursor-pointer">
+                            {icon}{label}
                         </button>
                     ))}
                 </div>
 
-                {/* ── Sign-in link ── */}
-                <p className="text-[11px] text-[#2e2e48] mt-5 w-full max-w-md font-mono">
+                {/* Sign-in */}
+                <p className="text-[11px] text-[#28283e] mt-5 w-full max-w-md font-mono">
                     Already have an account?{' '}
                     <Link to="/login" className="text-[#7b78ff] no-underline font-medium hover:text-[#9d9bff] transition-colors">
                         Sign in
