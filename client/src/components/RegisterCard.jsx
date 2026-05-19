@@ -39,65 +39,51 @@ const GoogleIcon = () => (
 /* ── step sidebar item ── */
 const Step = ({ icon, title, sub, active, done, showLine }) => (
     <div>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-            <div style={{
-                width: 28, height: 28, borderRadius: 8, flexShrink: 0, marginTop: 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: active ? '#3d2fff' : done ? '#132d1f' : '#13131e',
-                border: `1.5px solid ${active ? '#3d2fff' : done ? '#2a5c45' : '#1e1e30'}`,
-                color: active ? '#fff' : done ? '#4ecb8a' : '#35354a',
-                fontSize: 13,
-                transition: 'all .2s',
-            }}>
+        <div className="flex items-start gap-3">
+            <div className={`
+                w-7 h-7 rounded-lg shrink-0 mt-0.5
+                flex items-center justify-center
+                border transition-all duration-200
+                ${active
+                    ? 'bg-[#3d2fff] border-[#3d2fff] text-white'
+                    : done
+                        ? 'bg-[#132d1f] border-[#2a5c45] text-[#4ecb8a]'
+                        : 'bg-[#13131e] border-[#1e1e30] text-[#35354a]'}
+                text-[13px]
+            `}>
                 {icon}
             </div>
             <div>
-                <div style={{
-                    fontSize: 13, fontWeight: 500, fontFamily: 'DM Mono, monospace',
-                    color: active ? '#c8c4ff' : done ? '#4ecb8a' : '#35354a',
-                    lineHeight: 1.3,
-                }}>
+                <div className={`
+                    text-[13px] font-medium font-mono leading-tight
+                    ${active ? 'text-[#c8c4ff]' : done ? 'text-[#4ecb8a]' : 'text-[#35354a]'}
+                `}>
                     {title}
                 </div>
-                <div style={{ fontSize: 11, color: active ? '#6a6a88' : '#2a2a40', marginTop: 1, fontFamily: 'DM Mono, monospace' }}>
+                <div className={`text-[11px] mt-0.5 font-mono ${active ? 'text-[#6a6a88]' : 'text-[#2a2a40]'}`}>
                     {sub}
                 </div>
             </div>
         </div>
         {showLine && (
-            <div style={{ width: 1, height: 20, background: '#1a1a2c', margin: '4px 0 4px 14px' }} />
+            <div className="w-px h-5 bg-[#1a1a2c] ml-3.5 my-1" />
         )}
     </div>
 );
 
 /* ── field wrapper ── */
 const Field = ({ label, error, children }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <label style={{
-            fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: '#4a4a62', fontFamily: 'DM Mono, monospace', fontWeight: 500,
-        }}>
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] tracking-[0.14em] uppercase text-[#4a4a62] font-mono font-medium">
             {label}
         </label>
         {children}
-        {error && <p style={{ fontSize: 11, color: '#e05555', margin: 0, fontFamily: 'DM Mono, monospace' }}>{error}</p>}
+        {error && <p className="text-[11px] text-[#e05555] m-0 font-mono">{error}</p>}
     </div>
 );
 
-/* ── shared input style builder ── */
-const inputStyle = (hasError, extra = {}) => ({
-    width: '100%', boxSizing: 'border-box',
-    background: '#0e0e1a',
-    border: `1px solid ${hasError ? '#6a2222' : '#1e1e30'}`,
-    borderRadius: 8,
-    padding: '11px 14px',
-    fontSize: 13,
-    color: '#d4d0ff',
-    fontFamily: 'DM Mono, monospace',
-    outline: 'none',
-    transition: 'border-color .15s',
-    ...extra,
-});
+/* ── shared input base classes ── */
+const inputBase = "w-full box-border bg-[#0e0e1a] border rounded-lg px-3.5 py-[11px] text-[13px] text-[#d4d0ff] font-mono outline-none transition-colors duration-150 placeholder-[#2a2a42] focus:border-[#3d2fff]";
 
 /* ════════════════════════════════════════════ */
 const RegisterPage = () => {
@@ -110,6 +96,7 @@ const RegisterPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [agreed, setAgreed] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const passwordRules = [
         { label: '8+ chars', test: (p) => p.length >= 8 },
@@ -155,28 +142,13 @@ const RegisterPage = () => {
 
     /* ── render ── */
     return (
-        <div style={{
-            minHeight: '100vh',
-            background: '#080810',
-            display: 'flex',
-            alignItems: 'stretch',
-            fontFamily: 'DM Mono, monospace',
-        }}>
-            {/* ── Left sidebar ── */}
-            <aside style={{
-                width: 240, flexShrink: 0,
-                background: '#0c0c16',
-                borderRight: '1px solid #14142a',
-                padding: '32px 24px',
-                display: 'flex',
-                flexDirection: 'column',
-            }}>
+        <div className="min-h-screen bg-[#080810] flex items-stretch font-mono">
+
+            {/* ── Mobile top bar (visible only on mobile) ── */}
+            <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-[#0c0c16] border-b border-[#14142a] px-4 py-3 flex items-center justify-between">
                 {/* Logo */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
-                    <div style={{
-                        width: 32, height: 32, background: '#3d2fff', borderRadius: 8,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0">
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
                             <rect x="2" y="3" width="7" height="7" rx="1" />
                             <rect x="15" y="3" width="7" height="7" rx="1" />
@@ -184,9 +156,67 @@ const RegisterPage = () => {
                             <rect x="15" y="15" width="7" height="7" rx="1" />
                         </svg>
                     </div>
-                    <span style={{ fontSize: 15, fontWeight: 500, color: '#d8d4ff', letterSpacing: '0.06em' }}>
-                        DevShelf
-                    </span>
+                    <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
+                </div>
+
+                {/* Step progress pills on mobile */}
+                <div className="flex items-center gap-1.5">
+                    {['Account', 'Security', 'Confirm'].map((s, i) => (
+                        <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'w-6 bg-[#3d2fff]' : 'w-3 bg-[#1e1e30]'}`} />
+                    ))}
+                    <span className="text-[10px] text-[#4a4a62] font-mono ml-1">1/3</span>
+                </div>
+
+                {/* Hamburger to toggle sidebar */}
+                <button
+                    onClick={() => setSidebarOpen(v => !v)}
+                    className="text-[#4a4a62] hover:text-[#c8c4ff] transition-colors p-1"
+                    aria-label="Toggle steps"
+                >
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        {sidebarOpen
+                            ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
+                    </svg>
+                </button>
+            </div>
+
+            {/* ── Mobile sidebar drawer ── */}
+            {sidebarOpen && (
+                <div className="md:hidden fixed inset-0 z-10 bg-black/60" onClick={() => setSidebarOpen(false)}>
+                    <div
+                        className="absolute top-[57px] left-0 bottom-0 w-64 bg-[#0c0c16] border-r border-[#14142a] p-6 flex flex-col"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col gap-0 mb-6">
+                            <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
+                                title="Account" sub="Name & email" active showLine />
+                            <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>}
+                                title="Security" sub="Set a password" showLine />
+                            <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                                title="Confirm" sub="Review & submit" />
+                        </div>
+                        <div className="mt-auto pt-6 border-t border-[#14142a]">
+                            <div className="text-[11px] text-[#2a2a40] leading-relaxed">Already on DevShelf?</div>
+                            <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Desktop left sidebar (hidden on mobile) ── */}
+            <aside className="hidden md:flex w-60 shrink-0 bg-[#0c0c16] border-r border-[#14142a] px-6 py-8 flex-col">
+                {/* Logo */}
+                <div className="flex items-center gap-2.5 mb-12">
+                    <div className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
+                            <rect x="2" y="3" width="7" height="7" rx="1" />
+                            <rect x="15" y="3" width="7" height="7" rx="1" />
+                            <rect x="2" y="15" width="7" height="7" rx="1" />
+                            <rect x="15" y="15" width="7" height="7" rx="1" />
+                        </svg>
+                    </div>
+                    <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
                 </div>
 
                 {/* Steps */}
@@ -198,66 +228,54 @@ const RegisterPage = () => {
                     title="Confirm" sub="Review & submit" />
 
                 {/* Bottom sign-in nudge */}
-                <div style={{ marginTop: 'auto', paddingTop: 24, borderTop: '1px solid #14142a' }}>
-                    <div style={{ fontSize: 11, color: '#2a2a40', lineHeight: 1.7 }}>
-                        Already on DevShelf?
-                    </div>
-                    <Link to="/login" style={{ fontSize: 12, color: '#5548ff', textDecoration: 'none' }}>
-                        Sign in →
-                    </Link>
+                <div className="mt-auto pt-6 border-t border-[#14142a]">
+                    <div className="text-[11px] text-[#2a2a40] leading-relaxed">Already on DevShelf?</div>
+                    <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
                 </div>
             </aside>
 
             {/* ── Main form panel ── */}
-            <main style={{
-                flex: 1,
-                padding: '44px 52px',
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-            }}>
+            <main className="flex-1 overflow-y-auto flex flex-col
+                px-4 py-6
+                pt-[calc(57px+24px)]
+                sm:px-8 sm:py-10
+                md:px-10 md:py-11
+                lg:px-14 lg:py-11
+                md:pt-11
+            ">
                 {/* Eyebrow */}
-                <p style={{ fontSize: 10, letterSpacing: '0.18em', color: '#3d2fff', textTransform: 'uppercase', margin: '0 0 10px' }}>
+                <p className="text-[10px] tracking-[0.18em] text-[#3d2fff] uppercase mb-2.5">
                     Step 1 of 3
                 </p>
 
                 {/* Title */}
-                <h1 style={{ fontSize: 32, fontWeight: 600, color: '#e0dcff', lineHeight: 1.15, margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+                <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-semibold text-[#e0dcff] leading-tight mb-1.5 tracking-tight">
                     Create your<br />account{' '}
-                    <span style={{
-                        fontSize: 12, fontWeight: 400, verticalAlign: 'middle',
-                        background: '#1a1730', color: '#7b78ff',
-                        border: '1px solid #2d2860', borderRadius: 5,
-                        padding: '3px 8px', letterSpacing: '0.06em', marginLeft: 6,
-                    }}>
+                    <span className="text-xs font-normal align-middle bg-[#1a1730] text-[#7b78ff] border border-[#2d2860] rounded-[5px] px-2 py-0.5 tracking-[0.06em] ml-1.5">
                         Free
                     </span>
                 </h1>
-                <p style={{ fontSize: 12, color: '#3a3a52', margin: '0 0 32px' }}>
+                <p className="text-[12px] text-[#3a3a52] mb-8">
                     Start organizing your dev resources in minutes.
                 </p>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-xl">
 
-                    {/* Name + Username row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                    {/* Name + Username row — stacks on mobile, side by side on sm+ */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                         <Field label="Full Name" error={errors.userName}>
                             <input
                                 name="userName" type="text" autoComplete="name"
                                 placeholder="John Doe"
                                 value={formData.userName} onChange={handleChange}
-                                style={inputStyle(!!errors.userName)}
-                                onFocus={e => e.target.style.borderColor = '#3d2fff'}
-                                onBlur={e => e.target.style.borderColor = errors.userName ? '#6a2222' : '#1e1e30'}
+                                className={`${inputBase} border-[#1e1e30] ${errors.userName ? '!border-[#6a2222]' : ''}`}
                             />
                         </Field>
                         <Field label="Username">
                             <input
                                 name="username" type="text" autoComplete="username"
                                 placeholder="johndoe"
-                                style={inputStyle(false)}
-                                onFocus={e => e.target.style.borderColor = '#3d2fff'}
-                                onBlur={e => e.target.style.borderColor = '#1e1e30'}
+                                className={`${inputBase} border-[#1e1e30]`}
                             />
                         </Field>
                     </div>
@@ -268,43 +286,39 @@ const RegisterPage = () => {
                             name="email" type="email" autoComplete="email"
                             placeholder="you@example.com"
                             value={formData.email} onChange={handleChange}
-                            style={inputStyle(!!errors.email)}
-                            onFocus={e => e.target.style.borderColor = '#3d2fff'}
-                            onBlur={e => e.target.style.borderColor = errors.email ? '#6a2222' : '#1e1e30'}
+                            className={`${inputBase} border-[#1e1e30] ${errors.email ? '!border-[#6a2222]' : ''}`}
                         />
                     </Field>
 
                     {/* Password */}
                     <Field label="Password" error={errors.password}>
-                        <div style={{ position: 'relative' }}>
+                        <div className="relative">
                             <input
                                 name="password" type={showPassword ? 'text' : 'password'}
                                 autoComplete="new-password"
                                 placeholder="min. 8 characters"
                                 value={formData.password} onChange={handleChange}
-                                style={inputStyle(!!errors.password, { paddingRight: 40 })}
-                                onFocus={e => e.target.style.borderColor = '#3d2fff'}
-                                onBlur={e => e.target.style.borderColor = errors.password ? '#6a2222' : '#1e1e30'}
+                                className={`${inputBase} border-[#1e1e30] pr-10 ${errors.password ? '!border-[#6a2222]' : ''}`}
                             />
-                            <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#45455a', padding: 0, display: 'flex' }}>
+                            <button
+                                type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#45455a] flex p-0"
+                            >
                                 {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
                         {/* Strength pills */}
                         {formData.password && (
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
+                            <div className="flex gap-2 flex-wrap mt-1.5">
                                 {passwordRules.map((rule, i) => {
                                     const ok = rule.test(formData.password);
                                     return (
-                                        <span key={i} style={{
-                                            fontSize: 10, padding: '3px 10px', borderRadius: 20,
-                                            fontFamily: 'DM Mono, monospace',
-                                            border: `1px solid ${ok ? '#2a5c45' : '#1e1e30'}`,
-                                            color: ok ? '#4ecb8a' : '#3a3a55',
-                                            background: ok ? '#0d2018' : '#0e0e1a',
-                                            transition: 'all .2s',
-                                        }}>
+                                        <span key={i} className={`
+                                            text-[10px] px-2.5 py-[3px] rounded-full font-mono border transition-all duration-200
+                                            ${ok
+                                                ? 'border-[#2a5c45] text-[#4ecb8a] bg-[#0d2018]'
+                                                : 'border-[#1e1e30] text-[#3a3a55] bg-[#0e0e1a]'}
+                                        `}>
                                             {rule.label}
                                         </span>
                                     );
@@ -315,27 +329,30 @@ const RegisterPage = () => {
 
                     {/* Confirm password */}
                     <Field label="Confirm Password" error={errors.confirmPassword}>
-                        <div style={{ position: 'relative' }}>
+                        <div className="relative">
                             <input
                                 name="confirmPassword" type={showConfirm ? 'text' : 'password'}
                                 autoComplete="new-password"
                                 placeholder="repeat password"
                                 value={formData.confirmPassword} onChange={handleChange}
-                                style={inputStyle(!!errors.confirmPassword, {
-                                    paddingRight: 40,
-                                    borderColor: errors.confirmPassword ? '#6a2222' : passwordsMatch ? '#2a5c45' : '#1e1e30',
-                                })}
-                                onFocus={e => e.target.style.borderColor = '#3d2fff'}
-                                onBlur={e => e.target.style.borderColor = errors.confirmPassword ? '#6a2222' : passwordsMatch ? '#2a5c45' : '#1e1e30'}
+                                className={`${inputBase} pr-10
+                                    ${errors.confirmPassword
+                                        ? '!border-[#6a2222]'
+                                        : passwordsMatch
+                                            ? '!border-[#2a5c45]'
+                                            : 'border-[#1e1e30]'}
+                                `}
                             />
-                            <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
-                                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#45455a', padding: 0, display: 'flex' }}>
+                            <button
+                                type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#45455a] flex p-0"
+                            >
                                 {showConfirm ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
                         {!errors.confirmPassword && passwordsMatch && (
-                            <span style={{ fontSize: 11, color: '#4ecb8a', display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-                                <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0d2018', border: '1px solid #2a5c45', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span className="text-[11px] text-[#4ecb8a] flex items-center gap-1.5 mt-0.5">
+                                <span className="w-3.5 h-3.5 rounded-full bg-[#0d2018] border border-[#2a5c45] inline-flex items-center justify-center">
                                     <CheckIcon />
                                 </span>
                                 Passwords match
@@ -344,50 +361,52 @@ const RegisterPage = () => {
                     </Field>
 
                     {/* Terms */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+                    <div className="flex flex-col gap-1">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
                             <div
                                 onClick={() => { setAgreed(v => !v); setErrors(e => ({ ...e, agreed: '' })); }}
-                                style={{
-                                    width: 16, height: 16, borderRadius: 4, flexShrink: 0, marginTop: 1,
-                                    background: agreed ? '#3d2fff' : '#0e0e1a',
-                                    border: `1.5px solid ${agreed ? '#3d2fff' : errors.agreed ? '#6a2222' : '#2a2a40'}`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    cursor: 'pointer', transition: 'all .15s',
-                                }}
+                                className={`
+                                    w-4 h-4 rounded shrink-0 mt-0.5
+                                    flex items-center justify-center
+                                    cursor-pointer border transition-all duration-150
+                                    ${agreed
+                                        ? 'bg-[#3d2fff] border-[#3d2fff]'
+                                        : errors.agreed
+                                            ? 'bg-[#0e0e1a] border-[#6a2222]'
+                                            : 'bg-[#0e0e1a] border-[#2a2a40]'}
+                                `}
                             >
                                 {agreed && <CheckIcon />}
                             </div>
-                            <span style={{ fontSize: 11, color: '#45455a', lineHeight: 1.6 }}>
+                            <span className="text-[11px] text-[#45455a] leading-relaxed">
                                 I agree to the{' '}
-                                <Link to="/terms" style={{ color: '#7b78ff', textDecoration: 'underline', textUnderlineOffset: 2 }}>Terms of Service</Link>
+                                <Link to="/terms" className="text-[#7b78ff] underline underline-offset-2">Terms of Service</Link>
                                 {' '}and{' '}
-                                <Link to="/privacy" style={{ color: '#7b78ff', textDecoration: 'underline', textUnderlineOffset: 2 }}>Privacy Policy</Link>.
+                                <Link to="/privacy" className="text-[#7b78ff] underline underline-offset-2">Privacy Policy</Link>.
                                 {' '}DevShelf will never sell your data.
                             </span>
                         </label>
-                        {errors.agreed && <p style={{ fontSize: 11, color: '#e05555', margin: '0 0 0 26px' }}>{errors.agreed}</p>}
+                        {errors.agreed && (
+                            <p className="text-[11px] text-[#e05555] m-0 ml-[26px] font-mono">{errors.agreed}</p>
+                        )}
                     </div>
 
                     {/* Submit */}
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        style={{
-                            width: '100%', background: '#3d2fff',
-                            border: '1px solid #3d2fff', borderRadius: 8,
-                            padding: '13px 0', fontSize: 13, fontWeight: 500,
-                            color: '#fff', cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                            fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
-                            opacity: isSubmitting ? 0.55 : 1,
-                            transition: 'background .15s',
-                        }}
-                        onMouseEnter={e => { if (!isSubmitting) e.target.style.background = '#5548ff'; }}
-                        onMouseLeave={e => { e.target.style.background = '#3d2fff'; }}
+                        className={`
+                            w-full bg-[#3d2fff] border border-[#3d2fff] rounded-lg
+                            py-3.5 text-[13px] font-medium text-white
+                            font-mono tracking-[0.04em]
+                            transition-all duration-150
+                            hover:bg-[#5548ff] active:scale-[0.99]
+                            ${isSubmitting ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}
+                        `}
                     >
                         {isSubmitting
-                            ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                                <span style={{ width: 13, height: 13, border: '2px solid #ffffff66', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                            ? <span className="flex items-center justify-center gap-2">
+                                <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
                                 Creating account...
                             </span>
                             : 'Continue →'}
@@ -395,27 +414,22 @@ const RegisterPage = () => {
                 </form>
 
                 {/* Divider */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '22px 0', maxWidth: 600 }}>
-                    <div style={{ flex: 1, height: 1, background: '#14142a' }} />
-                    <span style={{ fontSize: 10, color: '#2a2a40', letterSpacing: '0.1em', textTransform: 'uppercase' }}>or sign up with</span>
-                    <div style={{ flex: 1, height: 1, background: '#14142a' }} />
+                <div className="flex items-center gap-3 my-5 w-full max-w-xl">
+                    <div className="flex-1 h-px bg-[#14142a]" />
+                    <span className="text-[10px] text-[#2a2a40] tracking-[0.1em] uppercase">or sign up with</span>
+                    <div className="flex-1 h-px bg-[#14142a]" />
                 </div>
 
                 {/* OAuth buttons */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, maxWidth: 600 }}>
+                <div className="grid grid-cols-2 gap-3 w-full max-w-xl">
                     {[
                         { icon: <GithubIcon />, label: 'GitHub' },
                         { icon: <GoogleIcon />, label: 'Google' },
                     ].map(({ icon, label }) => (
-                        <button key={label} type="button" style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                            background: '#0e0e1a', border: '1px solid #1e1e30', borderRadius: 8,
-                            padding: '11px 0', fontSize: 12, color: '#7a7a99',
-                            cursor: 'pointer', fontFamily: 'DM Mono, monospace',
-                            transition: 'border-color .15s, color .15s',
-                        }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = '#3a3a55'; e.currentTarget.style.color = '#a0a0c0'; }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e30'; e.currentTarget.style.color = '#7a7a99'; }}
+                        <button
+                            key={label}
+                            type="button"
+                            className="flex items-center justify-center gap-2 bg-[#0e0e1a] border border-[#1e1e30] rounded-lg py-3 text-[12px] text-[#7a7a99] cursor-pointer font-mono transition-all duration-150 hover:border-[#3a3a55] hover:text-[#a0a0c0]"
                         >
                             {icon}
                             {label}
@@ -424,9 +438,9 @@ const RegisterPage = () => {
                 </div>
 
                 {/* Sign in link */}
-                <p style={{ fontSize: 11, color: '#35354a', marginTop: 24, maxWidth: 600 }}>
+                <p className="text-[11px] text-[#35354a] mt-6 w-full max-w-xl pb-8 md:pb-0">
                     Already have an account?{' '}
-                    <Link to="/login" style={{ color: '#7b78ff', textDecoration: 'none', fontWeight: 500 }}>
+                    <Link to="/login" className="text-[#7b78ff] no-underline font-medium">
                         Sign in
                     </Link>
                 </p>
@@ -436,7 +450,6 @@ const RegisterPage = () => {
                 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
                 @keyframes spin { to { transform: rotate(360deg); } }
                 input::placeholder { color: #2a2a42; }
-                input:focus { border-color: #3d2fff !important; }
             `}</style>
         </div>
     );
