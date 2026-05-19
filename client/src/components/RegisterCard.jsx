@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
-/* ── inline SVG icons ── */
+/* ── SVG Icons ── */
 const EyeIcon = () => (
     <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -36,28 +36,30 @@ const GoogleIcon = () => (
     </svg>
 );
 
-/* ── step sidebar item ── */
+const LogoMark = () => (
+    <div className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
+            <rect x="2" y="3" width="7" height="7" rx="1" />
+            <rect x="15" y="3" width="7" height="7" rx="1" />
+            <rect x="2" y="15" width="7" height="7" rx="1" />
+            <rect x="15" y="15" width="7" height="7" rx="1" />
+        </svg>
+    </div>
+);
+
+/* ── Step sidebar item ── */
 const Step = ({ icon, title, sub, active, done, showLine }) => (
     <div>
         <div className="flex items-start gap-3">
-            <div className={`
-                w-7 h-7 rounded-lg shrink-0 mt-0.5
-                flex items-center justify-center
-                border transition-all duration-200
-                ${active
-                    ? 'bg-[#3d2fff] border-[#3d2fff] text-white'
-                    : done
-                        ? 'bg-[#132d1f] border-[#2a5c45] text-[#4ecb8a]'
-                        : 'bg-[#13131e] border-[#1e1e30] text-[#35354a]'}
-                text-[13px]
-            `}>
+            <div className={`w-7 h-7 rounded-lg shrink-0 mt-0.5 flex items-center justify-center border transition-all duration-200 text-[13px]
+                ${active ? 'bg-[#3d2fff] border-[#3d2fff] text-white'
+                    : done ? 'bg-[#132d1f] border-[#2a5c45] text-[#4ecb8a]'
+                        : 'bg-[#13131e] border-[#1e1e30] text-[#35354a]'}`}>
                 {icon}
             </div>
             <div>
-                <div className={`
-                    text-[13px] font-medium font-mono leading-tight
-                    ${active ? 'text-[#c8c4ff]' : done ? 'text-[#4ecb8a]' : 'text-[#35354a]'}
-                `}>
+                <div className={`text-[13px] font-medium font-mono leading-tight
+                    ${active ? 'text-[#c8c4ff]' : done ? 'text-[#4ecb8a]' : 'text-[#35354a]'}`}>
                     {title}
                 </div>
                 <div className={`text-[11px] mt-0.5 font-mono ${active ? 'text-[#6a6a88]' : 'text-[#2a2a40]'}`}>
@@ -65,13 +67,11 @@ const Step = ({ icon, title, sub, active, done, showLine }) => (
                 </div>
             </div>
         </div>
-        {showLine && (
-            <div className="w-px h-5 bg-[#1a1a2c] ml-3.5 my-1" />
-        )}
+        {showLine && <div className="w-px h-5 bg-[#1a1a2c] ml-3.5 my-1" />}
     </div>
 );
 
-/* ── field wrapper ── */
+/* ── Field wrapper ── */
 const Field = ({ label, error, children }) => (
     <div className="flex flex-col gap-1.5">
         <label className="text-[10px] tracking-[0.14em] uppercase text-[#4a4a62] font-mono font-medium">
@@ -82,8 +82,7 @@ const Field = ({ label, error, children }) => (
     </div>
 );
 
-/* ── shared input base classes ── */
-const inputBase = "w-full box-border bg-[#0e0e1a] border rounded-lg px-3.5 py-[11px] text-[13px] text-[#d4d0ff] font-mono outline-none transition-colors duration-150 placeholder-[#2a2a42] focus:border-[#3d2fff]";
+const inputBase = 'w-full bg-[#0e0e1a] border rounded-lg px-3.5 py-3 text-[13px] text-[#d4d0ff] font-mono outline-none transition-colors duration-150 focus:border-[#3d2fff]';
 
 /* ════════════════════════════════════════════ */
 const RegisterPage = () => {
@@ -96,7 +95,7 @@ const RegisterPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [agreed, setAgreed] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     const passwordRules = [
         { label: '8+ chars', test: (p) => p.length >= 8 },
@@ -140,318 +139,280 @@ const RegisterPage = () => {
 
     const passwordsMatch = formData.confirmPassword && formData.password === formData.confirmPassword;
 
-    /* ── render ── */
+    const stepsData = [
+        {
+            title: 'Account', sub: 'Name & email', active: true,
+            icon: <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+        },
+        {
+            title: 'Security', sub: 'Set a password',
+            icon: <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>,
+        },
+        {
+            title: 'Confirm', sub: 'Review & submit',
+            icon: <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>,
+        },
+    ];
+
     return (
-        <div className="min-h-screen bg-[#080810] flex items-stretch font-mono">
-
-            {/* ── Mobile top bar (visible only on mobile) ── */}
-            <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-[#0c0c16] border-b border-[#14142a] px-4 py-3 flex items-center justify-between">
-                {/* Logo */}
-                <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
-                            <rect x="2" y="3" width="7" height="7" rx="1" />
-                            <rect x="15" y="3" width="7" height="7" rx="1" />
-                            <rect x="2" y="15" width="7" height="7" rx="1" />
-                            <rect x="15" y="15" width="7" height="7" rx="1" />
-                        </svg>
-                    </div>
-                    <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
-                </div>
-
-                {/* Step progress pills on mobile */}
-                <div className="flex items-center gap-1.5">
-                    {['Account', 'Security', 'Confirm'].map((s, i) => (
-                        <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'w-6 bg-[#3d2fff]' : 'w-3 bg-[#1e1e30]'}`} />
-                    ))}
-                    <span className="text-[10px] text-[#4a4a62] font-mono ml-1">1/3</span>
-                </div>
-
-                {/* Hamburger to toggle sidebar */}
-                <button
-                    onClick={() => setSidebarOpen(v => !v)}
-                    className="text-[#4a4a62] hover:text-[#c8c4ff] transition-colors p-1"
-                    aria-label="Toggle steps"
-                >
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        {sidebarOpen
-                            ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
-                    </svg>
-                </button>
-            </div>
-
-            {/* ── Mobile sidebar drawer ── */}
-            {sidebarOpen && (
-                <div className="md:hidden fixed inset-0 z-10 bg-black/60" onClick={() => setSidebarOpen(false)}>
-                    <div
-                        className="absolute top-[57px] left-0 bottom-0 w-64 bg-[#0c0c16] border-r border-[#14142a] p-6 flex flex-col"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <div className="flex flex-col gap-0 mb-6">
-                            <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
-                                title="Account" sub="Name & email" active showLine />
-                            <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>}
-                                title="Security" sub="Set a password" showLine />
-                            <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-                                title="Confirm" sub="Review & submit" />
-                        </div>
-                        <div className="mt-auto pt-6 border-t border-[#14142a]">
-                            <div className="text-[11px] text-[#2a2a40] leading-relaxed">Already on DevShelf?</div>
-                            <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Desktop left sidebar (hidden on mobile) ── */}
-            <aside className="hidden md:flex w-60 shrink-0 bg-[#0c0c16] border-r border-[#14142a] px-6 py-8 flex-col">
-                {/* Logo */}
-                <div className="flex items-center gap-2.5 mb-12">
-                    <div className="w-8 h-8 bg-[#3d2fff] rounded-lg flex items-center justify-center shrink-0">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
-                            <rect x="2" y="3" width="7" height="7" rx="1" />
-                            <rect x="15" y="3" width="7" height="7" rx="1" />
-                            <rect x="2" y="15" width="7" height="7" rx="1" />
-                            <rect x="15" y="15" width="7" height="7" rx="1" />
-                        </svg>
-                    </div>
-                    <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
-                </div>
-
-                {/* Steps */}
-                <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
-                    title="Account" sub="Name & email" active showLine />
-                <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>}
-                    title="Security" sub="Set a password" showLine />
-                <Step icon={<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-                    title="Confirm" sub="Review & submit" />
-
-                {/* Bottom sign-in nudge */}
-                <div className="mt-auto pt-6 border-t border-[#14142a]">
-                    <div className="text-[11px] text-[#2a2a40] leading-relaxed">Already on DevShelf?</div>
-                    <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
-                </div>
-            </aside>
-
-            {/* ── Main form panel ── */}
-            <main className="flex-1 overflow-y-auto flex flex-col
-                px-4 py-6
-                pt-[calc(57px+24px)]
-                sm:px-8 sm:py-10
-                md:px-10 md:py-11
-                lg:px-14 lg:py-11
-                md:pt-11
-            ">
-                {/* Eyebrow */}
-                <p className="text-[10px] tracking-[0.18em] text-[#3d2fff] uppercase mb-2.5">
-                    Step 1 of 3
-                </p>
-
-                {/* Title */}
-                <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-semibold text-[#e0dcff] leading-tight mb-1.5 tracking-tight">
-                    Create your<br />account{' '}
-                    <span className="text-xs font-normal align-middle bg-[#1a1730] text-[#7b78ff] border border-[#2d2860] rounded-[5px] px-2 py-0.5 tracking-[0.06em] ml-1.5">
-                        Free
-                    </span>
-                </h1>
-                <p className="text-[12px] text-[#3a3a52] mb-8">
-                    Start organizing your dev resources in minutes.
-                </p>
-
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-xl">
-
-                    {/* Name + Username row — stacks on mobile, side by side on sm+ */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        <Field label="Full Name" error={errors.userName}>
-                            <input
-                                name="userName" type="text" autoComplete="name"
-                                placeholder="John Doe"
-                                value={formData.userName} onChange={handleChange}
-                                className={`${inputBase} border-[#1e1e30] ${errors.userName ? '!border-[#6a2222]' : ''}`}
-                            />
-                        </Field>
-                        <Field label="Username">
-                            <input
-                                name="username" type="text" autoComplete="username"
-                                placeholder="johndoe"
-                                className={`${inputBase} border-[#1e1e30]`}
-                            />
-                        </Field>
-                    </div>
-
-                    {/* Email */}
-                    <Field label="Email Address" error={errors.email}>
-                        <input
-                            name="email" type="email" autoComplete="email"
-                            placeholder="you@example.com"
-                            value={formData.email} onChange={handleChange}
-                            className={`${inputBase} border-[#1e1e30] ${errors.email ? '!border-[#6a2222]' : ''}`}
-                        />
-                    </Field>
-
-                    {/* Password */}
-                    <Field label="Password" error={errors.password}>
-                        <div className="relative">
-                            <input
-                                name="password" type={showPassword ? 'text' : 'password'}
-                                autoComplete="new-password"
-                                placeholder="min. 8 characters"
-                                value={formData.password} onChange={handleChange}
-                                className={`${inputBase} border-[#1e1e30] pr-10 ${errors.password ? '!border-[#6a2222]' : ''}`}
-                            />
-                            <button
-                                type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#45455a] flex p-0"
-                            >
-                                {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-                            </button>
-                        </div>
-                        {/* Strength pills */}
-                        {formData.password && (
-                            <div className="flex gap-2 flex-wrap mt-1.5">
-                                {passwordRules.map((rule, i) => {
-                                    const ok = rule.test(formData.password);
-                                    return (
-                                        <span key={i} className={`
-                                            text-[10px] px-2.5 py-[3px] rounded-full font-mono border transition-all duration-200
-                                            ${ok
-                                                ? 'border-[#2a5c45] text-[#4ecb8a] bg-[#0d2018]'
-                                                : 'border-[#1e1e30] text-[#3a3a55] bg-[#0e0e1a]'}
-                                        `}>
-                                            {rule.label}
-                                        </span>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </Field>
-
-                    {/* Confirm password */}
-                    <Field label="Confirm Password" error={errors.confirmPassword}>
-                        <div className="relative">
-                            <input
-                                name="confirmPassword" type={showConfirm ? 'text' : 'password'}
-                                autoComplete="new-password"
-                                placeholder="repeat password"
-                                value={formData.confirmPassword} onChange={handleChange}
-                                className={`${inputBase} pr-10
-                                    ${errors.confirmPassword
-                                        ? '!border-[#6a2222]'
-                                        : passwordsMatch
-                                            ? '!border-[#2a5c45]'
-                                            : 'border-[#1e1e30]'}
-                                `}
-                            />
-                            <button
-                                type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#45455a] flex p-0"
-                            >
-                                {showConfirm ? <EyeIcon /> : <EyeOffIcon />}
-                            </button>
-                        </div>
-                        {!errors.confirmPassword && passwordsMatch && (
-                            <span className="text-[11px] text-[#4ecb8a] flex items-center gap-1.5 mt-0.5">
-                                <span className="w-3.5 h-3.5 rounded-full bg-[#0d2018] border border-[#2a5c45] inline-flex items-center justify-center">
-                                    <CheckIcon />
-                                </span>
-                                Passwords match
-                            </span>
-                        )}
-                    </Field>
-
-                    {/* Terms */}
-                    <div className="flex flex-col gap-1">
-                        <label className="flex items-start gap-2.5 cursor-pointer">
-                            <div
-                                onClick={() => { setAgreed(v => !v); setErrors(e => ({ ...e, agreed: '' })); }}
-                                className={`
-                                    w-4 h-4 rounded shrink-0 mt-0.5
-                                    flex items-center justify-center
-                                    cursor-pointer border transition-all duration-150
-                                    ${agreed
-                                        ? 'bg-[#3d2fff] border-[#3d2fff]'
-                                        : errors.agreed
-                                            ? 'bg-[#0e0e1a] border-[#6a2222]'
-                                            : 'bg-[#0e0e1a] border-[#2a2a40]'}
-                                `}
-                            >
-                                {agreed && <CheckIcon />}
-                            </div>
-                            <span className="text-[11px] text-[#45455a] leading-relaxed">
-                                I agree to the{' '}
-                                <Link to="/terms" className="text-[#7b78ff] underline underline-offset-2">Terms of Service</Link>
-                                {' '}and{' '}
-                                <Link to="/privacy" className="text-[#7b78ff] underline underline-offset-2">Privacy Policy</Link>.
-                                {' '}DevShelf will never sell your data.
-                            </span>
-                        </label>
-                        {errors.agreed && (
-                            <p className="text-[11px] text-[#e05555] m-0 ml-[26px] font-mono">{errors.agreed}</p>
-                        )}
-                    </div>
-
-                    {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`
-                            w-full bg-[#3d2fff] border border-[#3d2fff] rounded-lg
-                            py-3.5 text-[13px] font-medium text-white
-                            font-mono tracking-[0.04em]
-                            transition-all duration-150
-                            hover:bg-[#5548ff] active:scale-[0.99]
-                            ${isSubmitting ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}
-                        `}
-                    >
-                        {isSubmitting
-                            ? <span className="flex items-center justify-center gap-2">
-                                <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
-                                Creating account...
-                            </span>
-                            : 'Continue →'}
-                    </button>
-                </form>
-
-                {/* Divider */}
-                <div className="flex items-center gap-3 my-5 w-full max-w-xl">
-                    <div className="flex-1 h-px bg-[#14142a]" />
-                    <span className="text-[10px] text-[#2a2a40] tracking-[0.1em] uppercase">or sign up with</span>
-                    <div className="flex-1 h-px bg-[#14142a]" />
-                </div>
-
-                {/* OAuth buttons */}
-                <div className="grid grid-cols-2 gap-3 w-full max-w-xl">
-                    {[
-                        { icon: <GithubIcon />, label: 'GitHub' },
-                        { icon: <GoogleIcon />, label: 'Google' },
-                    ].map(({ icon, label }) => (
-                        <button
-                            key={label}
-                            type="button"
-                            className="flex items-center justify-center gap-2 bg-[#0e0e1a] border border-[#1e1e30] rounded-lg py-3 text-[12px] text-[#7a7a99] cursor-pointer font-mono transition-all duration-150 hover:border-[#3a3a55] hover:text-[#a0a0c0]"
-                        >
-                            {icon}
-                            {label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Sign in link */}
-                <p className="text-[11px] text-[#35354a] mt-6 w-full max-w-xl pb-8 md:pb-0">
-                    Already have an account?{' '}
-                    <Link to="/login" className="text-[#7b78ff] no-underline font-medium">
-                        Sign in
-                    </Link>
-                </p>
-            </main>
-
+        <>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
                 @keyframes spin { to { transform: rotate(360deg); } }
                 input::placeholder { color: #2a2a42; }
             `}</style>
-        </div>
+
+            <div className="min-h-screen bg-[#080810] font-mono flex flex-col md:flex-row md:items-stretch">
+
+                {/* ════ MOBILE TOP BAR ════ */}
+                <header className="md:hidden sticky top-0 z-30 bg-[#0c0c16] border-b border-[#14142a]">
+                    <div className="flex items-center justify-between px-5 py-3">
+                        <div className="flex items-center gap-2.5">
+                            <LogoMark />
+                            <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                            {[0, 1, 2].map(i => (
+                                <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === 0 ? 'w-6 bg-[#3d2fff]' : 'w-3 bg-[#1e1e30]'}`} />
+                            ))}
+                            <span className="text-[10px] text-[#4a4a62] ml-1">1/3</span>
+                        </div>
+
+                        <button
+                            onClick={() => setDrawerOpen(v => !v)}
+                            className="text-[#4a4a62] hover:text-[#c8c4ff] transition-colors p-1.5 rounded-lg hover:bg-[#1a1a2c] bg-transparent border-none cursor-pointer"
+                            aria-label="Toggle steps"
+                        >
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                {drawerOpen
+                                    ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Inline drawer */}
+                    {drawerOpen && (
+                        <div className="bg-[#0a0a14] border-t border-[#14142a] px-5 py-5">
+                            <div className="flex flex-col mb-4">
+                                {stepsData.map((s, i) => (
+                                    <Step key={s.title} {...s} showLine={i < stepsData.length - 1} />
+                                ))}
+                            </div>
+                            <div className="pt-4 border-t border-[#14142a]">
+                                <div className="text-[11px] text-[#2a2a40]">Already on DevShelf?</div>
+                                <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
+                            </div>
+                        </div>
+                    )}
+                </header>
+
+                {/* ════ DESKTOP SIDEBAR ════ */}
+                <aside className="hidden md:flex flex-col w-60 shrink-0 bg-[#0c0c16] border-r border-[#14142a] px-6 py-8">
+                    <div className="flex items-center gap-2.5 mb-12">
+                        <LogoMark />
+                        <span className="text-[15px] font-medium text-[#d8d4ff] tracking-[0.06em]">DevShelf</span>
+                    </div>
+                    <div className="flex flex-col">
+                        {stepsData.map((s, i) => (
+                            <Step key={s.title} {...s} showLine={i < stepsData.length - 1} />
+                        ))}
+                    </div>
+                    <div className="mt-auto pt-6 border-t border-[#14142a]">
+                        <div className="text-[11px] text-[#2a2a40] leading-relaxed">Already on DevShelf?</div>
+                        <Link to="/login" className="text-[12px] text-[#5548ff] no-underline">Sign in →</Link>
+                    </div>
+                </aside>
+
+                {/* ════ MAIN CONTENT ════ */}
+                <main className="flex-1 flex flex-col overflow-y-auto px-5 pt-8 pb-12 sm:px-8 md:px-10 md:pt-11 lg:px-14">
+
+                    <p className="text-[10px] tracking-[0.18em] text-[#3d2fff] uppercase mb-3">
+                        Step 1 of 3
+                    </p>
+
+                    <h1 className="text-[26px] sm:text-3xl lg:text-[32px] font-semibold text-[#e0dcff] leading-tight mb-2 tracking-tight">
+                        Create your account{' '}
+                        <span className="inline-block text-[11px] font-normal align-middle bg-[#1a1730] text-[#7b78ff] border border-[#2d2860] rounded-[5px] px-2 py-0.5 tracking-[0.06em] ml-1">
+                            Free
+                        </span>
+                    </h1>
+                    <p className="text-[12px] text-[#3a3a52] mb-7">
+                        Start organizing your dev resources in minutes.
+                    </p>
+
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-lg">
+
+                        {/* Full Name + Username: stack on mobile → 2-col on sm+ */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <Field label="Full Name" error={errors.userName}>
+                                <input
+                                    name="userName" type="text" autoComplete="name"
+                                    placeholder="John Doe"
+                                    value={formData.userName} onChange={handleChange}
+                                    className={`${inputBase} ${errors.userName ? 'border-[#6a2222]' : 'border-[#1e1e30]'}`}
+                                />
+                            </Field>
+                            <Field label="Username">
+                                <input
+                                    name="username" type="text" autoComplete="username"
+                                    placeholder="johndoe"
+                                    className={`${inputBase} border-[#1e1e30]`}
+                                />
+                            </Field>
+                        </div>
+
+                        {/* Email */}
+                        <Field label="Email Address" error={errors.email}>
+                            <input
+                                name="email" type="email" autoComplete="email"
+                                placeholder="you@example.com"
+                                value={formData.email} onChange={handleChange}
+                                className={`${inputBase} ${errors.email ? 'border-[#6a2222]' : 'border-[#1e1e30]'}`}
+                            />
+                        </Field>
+
+                        {/* Password */}
+                        <Field label="Password" error={errors.password}>
+                            <div className="relative">
+                                <input
+                                    name="password" type={showPassword ? 'text' : 'password'}
+                                    autoComplete="new-password" placeholder="min. 8 characters"
+                                    value={formData.password} onChange={handleChange}
+                                    className={`${inputBase} pr-10 ${errors.password ? 'border-[#6a2222]' : 'border-[#1e1e30]'}`}
+                                />
+                                <button type="button" tabIndex={-1}
+                                    onClick={() => setShowPassword(v => !v)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45455a] hover:text-[#7a7a99] bg-transparent border-none cursor-pointer flex p-0">
+                                    {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+                                </button>
+                            </div>
+                            {formData.password && (
+                                <div className="flex gap-2 flex-wrap mt-2">
+                                    {passwordRules.map((rule, i) => {
+                                        const ok = rule.test(formData.password);
+                                        return (
+                                            <span key={i} className={`text-[10px] px-2.5 py-[3px] rounded-full font-mono border transition-all duration-200
+                                                ${ok ? 'border-[#2a5c45] text-[#4ecb8a] bg-[#0d2018]'
+                                                    : 'border-[#1e1e30] text-[#3a3a55] bg-[#0e0e1a]'}`}>
+                                                {rule.label}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </Field>
+
+                        {/* Confirm Password */}
+                        <Field label="Confirm Password" error={errors.confirmPassword}>
+                            <div className="relative">
+                                <input
+                                    name="confirmPassword" type={showConfirm ? 'text' : 'password'}
+                                    autoComplete="new-password" placeholder="repeat password"
+                                    value={formData.confirmPassword} onChange={handleChange}
+                                    className={`${inputBase} pr-10
+                                        ${errors.confirmPassword ? 'border-[#6a2222]'
+                                            : passwordsMatch ? 'border-[#2a5c45]'
+                                                : 'border-[#1e1e30]'}`}
+                                />
+                                <button type="button" tabIndex={-1}
+                                    onClick={() => setShowConfirm(v => !v)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45455a] hover:text-[#7a7a99] bg-transparent border-none cursor-pointer flex p-0">
+                                    {showConfirm ? <EyeIcon /> : <EyeOffIcon />}
+                                </button>
+                            </div>
+                            {!errors.confirmPassword && passwordsMatch && (
+                                <span className="text-[11px] text-[#4ecb8a] flex items-center gap-1.5 mt-1">
+                                    <span className="w-3.5 h-3.5 rounded-full bg-[#0d2018] border border-[#2a5c45] inline-flex items-center justify-center">
+                                        <CheckIcon />
+                                    </span>
+                                    Passwords match
+                                </span>
+                            )}
+                        </Field>
+
+                        {/* Terms */}
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-start gap-3">
+                                <div
+                                    onClick={() => { setAgreed(v => !v); setErrors(e => ({ ...e, agreed: '' })); }}
+                                    className={`w-4 h-4 rounded shrink-0 mt-0.5 flex items-center justify-center cursor-pointer border transition-all duration-150
+                                        ${agreed ? 'bg-[#3d2fff] border-[#3d2fff]'
+                                            : errors.agreed ? 'bg-[#0e0e1a] border-[#6a2222]'
+                                                : 'bg-[#0e0e1a] border-[#2a2a40]'}`}
+                                >
+                                    {agreed && <CheckIcon />}
+                                </div>
+                                <span className="text-[11px] text-[#45455a] leading-relaxed">
+                                    I agree to the{' '}
+                                    <Link to="/terms" className="text-[#7b78ff] underline underline-offset-2">Terms of Service</Link>
+                                    {' '}and{' '}
+                                    <Link to="/privacy" className="text-[#7b78ff] underline underline-offset-2">Privacy Policy</Link>.
+                                    {' '}DevShelf will never sell your data.
+                                </span>
+                            </div>
+                            {errors.agreed && (
+                                <p className="text-[11px] text-[#e05555] m-0 ml-7 font-mono">{errors.agreed}</p>
+                            )}
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                            type="submit" disabled={isSubmitting}
+                            className={`w-full bg-[#3d2fff] hover:bg-[#5548ff] border border-[#3d2fff] rounded-lg
+                                py-3.5 text-[13px] font-medium text-white font-mono tracking-[0.04em]
+                                transition-all duration-150 active:scale-[0.99]
+                                ${isSubmitting ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                            {isSubmitting
+                                ? <span className="flex items-center justify-center gap-2">
+                                    <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
+                                    Creating account...
+                                </span>
+                                : 'Continue →'}
+                        </button>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-3 my-6 w-full max-w-lg">
+                        <div className="flex-1 h-px bg-[#14142a]" />
+                        <span className="text-[10px] text-[#2a2a40] tracking-[0.1em] uppercase whitespace-nowrap">
+                            or sign up with
+                        </span>
+                        <div className="flex-1 h-px bg-[#14142a]" />
+                    </div>
+
+                    {/* OAuth — "Coming Soon" toast until backend OAuth is wired up */}
+                    <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+                        {[
+                            { icon: <GithubIcon />, label: 'GitHub' },
+                            { icon: <GoogleIcon />, label: 'Google' },
+                        ].map(({ icon, label }) => (
+                            <button
+                                key={label} type="button"
+                                onClick={() => toast(`${label} sign-up coming soon!`, { icon: '🔒' })}
+                                className="flex items-center justify-center gap-2 bg-[#0e0e1a] border border-[#1e1e30]
+                                    rounded-lg py-3 text-[12px] text-[#7a7a99] font-mono
+                                    hover:border-[#3a3a55] hover:text-[#a0a0c0] hover:bg-[#13131e]
+                                    transition-all duration-150 cursor-pointer"
+                            >
+                                {icon}
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Sign-in link */}
+                    <p className="text-[11px] text-[#35354a] mt-6 w-full max-w-lg">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-[#7b78ff] no-underline font-medium hover:text-[#9d9bff] transition-colors">
+                            Sign in
+                        </Link>
+                    </p>
+                </main>
+            </div>
+        </>
     );
 };
 
