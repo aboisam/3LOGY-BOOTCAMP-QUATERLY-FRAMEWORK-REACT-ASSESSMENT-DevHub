@@ -2,15 +2,15 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import clsx from 'clsx';
 
-/* ─── Icons ─────────────────────────────────────────────────────────────── */
+/* ── Icons ── */
 const EyeIcon = () => (
     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
         <circle cx="12" cy="12" r="3" />
     </svg>
 );
-
 const EyeOffIcon = () => (
     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
@@ -19,36 +19,33 @@ const EyeOffIcon = () => (
     </svg>
 );
 
-/* ─── Background decorative circles (matching the mockup) ───────────────── */
+/* ── Background decorative SVG ── */
 const BgDecor = () => (
     <svg
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 1024 1024"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
         preserveAspectRatio="xMidYMid slice"
     >
-        {/* Top-right cluster — large circle with stripes */}
+        {/* Top-right cluster */}
         <circle cx="870" cy="120" r="170" fill="rgba(30,35,90,0.55)" />
         <circle cx="870" cy="120" r="120" fill="none" stroke="rgba(60,70,150,0.4)" strokeWidth="1" />
-        {/* Diagonal stripes inside top-right circle */}
         {[820, 840, 860, 880, 900, 920, 940, 960].map((x, i) => (
-            <line key={i} x1={x} y1="0" x2={x - 80} y2="240"
-                stroke="rgba(80,100,180,0.25)" strokeWidth="6" />
+            <line key={i} x1={x} y1="0" x2={x - 80} y2="240" stroke="rgba(80,100,180,0.25)" strokeWidth="6" />
         ))}
 
         {/* Bottom-left cluster */}
         <circle cx="100" cy="900" r="140" fill="rgba(28,33,85,0.5)" />
         <circle cx="100" cy="900" r="95" fill="none" stroke="rgba(55,65,140,0.35)" strokeWidth="1" />
         {[60, 80, 100, 120, 140, 160].map((x, i) => (
-            <line key={i} x1={x} y1="760" x2={x - 60} y2="1000"
-                stroke="rgba(70,90,170,0.22)" strokeWidth="6" />
+            <line key={i} x1={x} y1="760" x2={x - 60} y2="1000" stroke="rgba(70,90,170,0.22)" strokeWidth="6" />
         ))}
 
         {/* Bottom-right soft blob */}
         <circle cx="960" cy="920" r="200" fill="rgba(25,30,80,0.35)" />
 
-        {/* Very subtle centre radial glow */}
+        {/* Centre radial glow */}
         <radialGradient id="centreGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#3a50c0" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#3a50c0" stopOpacity="0" />
@@ -57,7 +54,19 @@ const BgDecor = () => (
     </svg>
 );
 
-/* ─── Page ───────────────────────────────────────────────────────────────── */
+/* ── Input class builder ── */
+const inputCls = (hasError) => clsx(
+    'w-full px-4 py-3.5 rounded-xl text-base outline-none',
+    'bg-white/5 text-text-body font-sans',
+    'border transition-all duration-150',
+    'placeholder:text-white/20',
+    'focus:ring-2 focus:ring-brand/20 focus:border-brand-light/80',
+    hasError
+        ? 'border-red-400/70'
+        : 'border-brand/30 hover:border-brand/50',
+);
+
+/* ════════════════════════════════════════════ */
 const LoginPage = () => {
     const { login, isLoading } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -73,23 +82,17 @@ const LoginPage = () => {
     };
 
     const validate = () => {
-        const newErrors = {};
-        if (!formData.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Enter a valid email address';
-        }
-        if (!formData.password) newErrors.password = 'Password is required';
-        return newErrors;
+        const e = {};
+        if (!formData.email) e.email = 'Email is required';
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) e.email = 'Enter a valid email address';
+        if (!formData.password) e.password = 'Password is required';
+        return e;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const validationErrors = validate();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            return;
-        }
+        const ve = validate();
+        if (Object.keys(ve).length) { setErrors(ve); return; }
         try {
             setIsSubmitting(true);
             await login(formData.email, formData.password);
@@ -104,115 +107,53 @@ const LoginPage = () => {
 
     const busy = isSubmitting || isLoading;
 
-    /* ── shared input style factory ── */
-    const inputStyle = (hasError) => ({
-        width: '100%',
-        padding: '14px 16px',
-        borderRadius: '10px',
-        fontSize: '15px',
-        outline: 'none',
-        background: 'rgba(15,18,60,0.6)',
-        border: `1.5px solid ${hasError ? 'rgba(248,113,113,0.7)' : 'rgba(90,110,210,0.35)'}`,
-        color: '#c8d4ff',
-        boxSizing: 'border-box',
-        fontFamily: "'Outfit', sans-serif",
-        transition: 'border-color 0.18s, box-shadow 0.18s',
-    });
-
-    const focusBorder = (e) => {
-        e.target.style.borderColor = 'rgba(120,150,255,0.85)';
-        e.target.style.boxShadow = '0 0 0 3px rgba(99,130,255,0.15)';
-    };
-    const blurBorder = (e, hasError) => {
-        e.target.style.borderColor = hasError ? 'rgba(248,113,113,0.7)' : 'rgba(90,110,210,0.35)';
-        e.target.style.boxShadow = 'none';
-    };
-
     return (
-        /* Page background — muted blue-steel matching the mockup */
-        <div style={{
-            position: 'relative',
-            minHeight: '100vh',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            padding: '40px 16px',
-            background: 'linear-gradient(160deg, #2c3470 0%, #1e2455 35%, #181e48 65%, #131840 100%)',
-            fontFamily: "'Outfit', sans-serif",
-        }}>
+        /*
+          PAGE
+          mobile  → centred column, tight padding
+          sm+     → more breathing room
+        */
+        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden px-4 py-10 sm:px-6 sm:py-16"
+            style={{ background: 'linear-gradient(160deg, #2c3470 0%, #1e2455 35%, #181e48 65%, #131840 100%)' }}
+        >
             <BgDecor />
 
-            {/* ── Card ── */}
-            <div style={{
-                position: 'relative',
-                zIndex: 10,
-                width: '100%',
-                maxWidth: '480px',
-                background: 'linear-gradient(160deg, #1a1f55 0%, #12163d 100%)',
-                borderRadius: '20px',
-                border: '1px solid rgba(90,110,210,0.28)',
-                padding: '48px 44px 40px',
-                boxShadow: '0 24px 72px rgba(0,0,20,0.55)',
-                boxSizing: 'border-box',
-            }}>
+            {/* ── CARD ── */}
+            <div className="
+        relative z-10 w-full
+        max-w-sm sm:max-w-md
+        rounded-2xl border border-brand/25
+        px-6 py-10
+        sm:px-10 sm:py-12
+      "
+                style={{
+                    background: 'linear-gradient(160deg, #1a1f55 0%, #12163d 100%)',
+                    boxShadow: '0 24px 72px rgba(0,0,20,0.55)',
+                }}
+            >
 
-                {/* ── Logo ── */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    marginBottom: '24px',
-                }}>
-                    <span style={{ fontSize: '22px', lineHeight: 1 }}>📁</span>
-                    <span style={{
-                        fontSize: '20px',
-                        fontWeight: 700,
-                        color: '#ffffff',
-                        letterSpacing: '-0.3px',
-                    }}>
-                        DevShelf
-                    </span>
+                {/* Logo */}
+                <div className="flex items-center justify-center gap-2.5 mb-6">
+                    <span className="text-2xl leading-none">📁</span>
+                    <span className="text-xl font-bold text-white tracking-tight">DevShelf</span>
                 </div>
 
-                {/* ── Heading ── */}
-                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                    <h1 style={{
-                        fontSize: '32px',
-                        fontWeight: 800,
-                        color: '#ffffff',
-                        margin: '0 0 8px',
-                        letterSpacing: '-0.5px',
-                        lineHeight: 1.2,
-                    }}>
+                {/* Heading */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2">
                         Welcome Back
                     </h1>
-                    <p style={{
-                        fontSize: '15px',
-                        color: 'rgba(160,175,230,0.75)',
-                        margin: 0,
-                    }}>
+                    <p className="text-sm sm:text-base text-brand-light/75">
                         Sign in to your account
                     </p>
                 </div>
 
-                {/* ── Form ── */}
-                <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* ── FORM ── */}
+                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
 
                     {/* Email */}
-                    <div>
-                        <label
-                            htmlFor="email"
-                            style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: 500,
-                                color: 'rgba(200,215,255,0.90)',
-                                marginBottom: '8px',
-                            }}
-                        >
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="email" className="text-sm font-medium text-text-body/90">
                             Email
                         </label>
                         <input
@@ -220,151 +161,81 @@ const LoginPage = () => {
                             name="email"
                             type="email"
                             autoComplete="email"
+                            placeholder="you@example.com"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="you@example.com"
-                            style={inputStyle(!!errors.email)}
-                            onFocus={focusBorder}
-                            onBlur={e => blurBorder(e, !!errors.email)}
+                            className={inputCls(!!errors.email)}
                         />
                         {errors.email && (
-                            <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'rgba(252,165,165,0.9)' }}>
-                                {errors.email}
-                            </p>
+                            <p className="text-xs text-red-300/90">{errors.email}</p>
                         )}
                     </div>
 
                     {/* Password */}
-                    <div>
-                        <label
-                            htmlFor="password"
-                            style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: 500,
-                                color: 'rgba(200,215,255,0.90)',
-                                marginBottom: '8px',
-                            }}
-                        >
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="password" className="text-sm font-medium text-text-body/90">
                             Password
                         </label>
-                        <div style={{ position: 'relative' }}>
+                        <div className="relative">
                             <input
                                 id="password"
                                 name="password"
                                 type={showPassword ? 'text' : 'password'}
                                 autoComplete="current-password"
+                                placeholder="••••••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
-                                placeholder="••••••••••••"
-                                style={{
-                                    ...inputStyle(!!errors.password),
-                                    paddingRight: '48px',
-                                    letterSpacing: showPassword ? 'normal' : '2px',
-                                }}
-                                onFocus={focusBorder}
-                                onBlur={e => blurBorder(e, !!errors.password)}
+                                className={clsx(inputCls(!!errors.password), 'pr-12', !showPassword && 'tracking-widest')}
                             />
-                            {/* Eye toggle */}
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(p => !p)}
+                                onClick={() => setShowPassword((p) => !p)}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                style={{
-                                    position: 'absolute',
-                                    right: '14px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: 'rgba(120,145,210,0.65)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    padding: '4px',
-                                }}
-                                onMouseEnter={e => e.currentTarget.style.color = 'rgba(170,190,255,0.95)'}
-                                onMouseLeave={e => e.currentTarget.style.color = 'rgba(120,145,210,0.65)'}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 border-0 bg-transparent text-brand-light/60 hover:text-brand-lighter cursor-pointer flex items-center transition-colors duration-150"
                             >
                                 {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
                         {errors.password && (
-                            <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'rgba(252,165,165,0.9)' }}>
-                                {errors.password}
-                            </p>
+                            <p className="text-xs text-red-300/90">{errors.password}</p>
                         )}
                     </div>
 
-                    {/* ── Login button ── */}
+                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={busy}
-                        style={{
-                            width: '100%',
-                            padding: '15px',
-                            marginTop: '4px',
-                            borderRadius: '10px',
-                            fontSize: '16px',
-                            fontWeight: 700,
-                            color: '#ffffff',
-                            background: busy
-                                ? 'rgba(60,80,200,0.4)'
-                                : '#3d52d5',
-                            border: 'none',
-                            cursor: busy ? 'not-allowed' : 'pointer',
-                            fontFamily: "'Outfit', sans-serif",
-                            letterSpacing: '0.2px',
-                            transition: 'background 0.18s, box-shadow 0.18s',
-                            boxShadow: busy ? 'none' : '0 4px 20px rgba(60,90,220,0.40)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '10px',
-                        }}
-                        onMouseEnter={e => { if (!busy) { e.currentTarget.style.background = '#4a61e0'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(60,90,220,0.55)'; } }}
-                        onMouseLeave={e => { if (!busy) { e.currentTarget.style.background = '#3d52d5'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(60,90,220,0.40)'; } }}
+                        className={clsx(
+                            'w-full mt-1 py-4 rounded-xl',
+                            'text-base font-bold text-white tracking-wide',
+                            'border-0 transition-all duration-150',
+                            'flex items-center justify-center gap-2.5',
+                            busy
+                                ? 'opacity-50 cursor-not-allowed bg-brand/40'
+                                : 'cursor-pointer bg-brand hover:bg-brand-hover active:scale-[0.99]',
+                        )}
+                        style={!busy ? { boxShadow: '0 4px 20px rgba(60,90,220,0.40)' } : {}}
                     >
                         {busy ? (
                             <>
-                                <svg style={{ width: 16, height: 16, animation: 'spin 0.75s linear infinite' }} fill="none" viewBox="0 0 24 24">
-                                    <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                </svg>
-                                <span style={{ color: 'rgba(255,255,255,0.65)' }}>Signing in…</span>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="text-white/65">Signing in…</span>
                             </>
                         ) : 'Login'}
                     </button>
                 </form>
 
-                {/* ── Sign up link ── */}
-                <p style={{
-                    textAlign: 'center',
-                    marginTop: '24px',
-                    fontSize: '14px',
-                    color: 'rgba(140,160,215,0.80)',
-                }}>
+                {/* Sign-up link */}
+                <p className="text-center mt-6 text-sm text-brand-light/80">
                     Don't have an account?{' '}
                     <Link
                         to="/register"
-                        style={{
-                            fontWeight: 600,
-                            color: '#ffffff',
-                            textDecoration: 'underline',
-                            textUnderlineOffset: '3px',
-                            textDecorationColor: 'rgba(255,255,255,0.45)',
-                            transition: 'text-decoration-color 0.15s',
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.9)'}
-                        onMouseLeave={e => e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.45)'}
+                        className="font-semibold text-white underline underline-offset-4 decoration-white/40 hover:decoration-white/90 transition-all duration-150"
                     >
                         Sign up
                     </Link>
                 </p>
             </div>
-
-            {/* Spin keyframe */}
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 };
