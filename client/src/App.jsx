@@ -25,6 +25,7 @@ const AppLayout = () => {
     <>
       {!hideNavbar && <Navbar />}
 
+
       {/* Toast notifications available on every page */}
       <Toaster position="top-right" />
 
@@ -55,6 +56,7 @@ function App() {
         <AppLayout />
       </AuthProvider>
     </BrowserRouter>
+
   );
 }
 

@@ -2,11 +2,13 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import clsx from 'clsx';
 
 /* ── Icons ── */
 const EyeIcon = () => (
     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
     </svg>
 );
 const EyeOffIcon = () => (
@@ -37,7 +39,7 @@ const GoogleIcon = () => (
 
 /* ── Logo ── */
 const LogoMark = () => (
-    <div className="w-9 h-9 bg-[#4f46e5] rounded-xl flex items-center justify-center shrink-0">
+    <div className="w-9 h-9 bg-brand rounded-xl flex items-center justify-center shrink-0">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
             <rect x="2" y="3" width="7" height="7" rx="1" />
             <rect x="15" y="3" width="7" height="7" rx="1" />
@@ -47,15 +49,17 @@ const LogoMark = () => (
     </div>
 );
 
-/* ── Icons for steps ── */
+/* ── Sidebar step icons ── */
 const UserIcon = () => (
     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
     </svg>
 );
 const LockIcon = () => (
     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+        <rect x="3" y="11" width="18" height="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0110 0v4" />
     </svg>
 );
 const TickIcon = () => (
@@ -64,74 +68,74 @@ const TickIcon = () => (
     </svg>
 );
 
-/* ────────────────────────────────────────
-   SIDEBAR STEP
-   active  → purple filled icon, bright label
-   done    → green icon, green label
-   default → dim icon, dim label
-──────────────────────────────────────── */
-const Step = ({ icon, title, sub, active, done, showLine }) => {
-    const iconCls = active
-        ? 'bg-[#4f46e5] border-[#4f46e5] text-white'
-        : done
-            ? 'bg-[#0d2018] border-[#2a5c45] text-[#4ecb8a]'
-            : 'bg-transparent border-[#1e1e35] text-[#2e2e50]';
-
-    const titleCls = active
-        ? 'text-white'
-        : done
-            ? 'text-[#4ecb8a]'
-            : 'text-[#2e2e50]';
-
-    const subCls = active ? 'text-[#5a5a80]' : 'text-[#1e1e35]';
-
-    return (
-        <div>
-            <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border transition-all duration-200 ${iconCls}`}>
-                    {icon}
-                </div>
-                <div>
-                    <p className={`text-[13px] font-semibold font-mono leading-tight ${titleCls}`}>{title}</p>
-                    <p className={`text-[11px] font-mono mt-0.5 ${subCls}`}>{sub}</p>
-                </div>
+/* ── Step component ── */
+const Step = ({ icon, title, sub, active, done, showLine }) => (
+    <div>
+        <div className="flex items-center gap-3">
+            <div className={clsx(
+                'w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border transition-all duration-200',
+                active && 'bg-brand border-brand text-white',
+                done && 'bg-success-surface border-success-dim text-success',
+                !active && !done && 'bg-transparent border-border-subtle text-border-subtle',
+            )}>
+                {icon}
             </div>
-            {showLine && (
-                <div className="w-px h-6 bg-[#1a1a30] ml-4 my-1.5" />
-            )}
+            <div>
+                <p className={clsx(
+                    'text-sm font-semibold font-mono leading-tight',
+                    active && 'text-text-primary',
+                    done && 'text-success',
+                    !active && !done && 'text-text-dim',
+                )}>
+                    {title}
+                </p>
+                <p className={clsx(
+                    'text-xs font-mono mt-0.5',
+                    active ? 'text-text-hint' : 'text-border-subtle',
+                )}>
+                    {sub}
+                </p>
+            </div>
         </div>
-    );
-};
-
-/* ── Form field wrapper ── */
-const Field = ({ label, error, children }) => (
-    <div className="flex flex-col gap-1.5">
-        <label className="text-[11px] tracking-[0.1em] uppercase text-[#5a5a7a] font-mono font-medium select-none">
-            {label}
-        </label>
-        {children}
-        {error && <p className="text-[11px] text-[#e05555] font-mono">{error}</p>}
+        {showLine && <div className="w-px h-6 bg-border-dim ml-4 my-1.5" />}
     </div>
 );
 
-/* ── Input class builder ── */
-const inputCls = ({ error = false, valid = false, extra = '' } = {}) => [
-    'w-full bg-[#111125] border rounded-lg',
-    'px-4 py-3 text-[13px] text-[#c8c4ff] font-mono',
-    'outline-none placeholder:text-[#2a2a45]',
-    'transition-all duration-150',
-    error ? 'border-[#5c1e1e] focus:border-[#e05555] focus:shadow-[0_0_0_2px_rgba(224,85,85,0.15)]' : '',
-    valid ? 'border-[#1f4d38] focus:border-[#4ecb8a] focus:shadow-[0_0_0_2px_rgba(78,203,138,0.12)]' : '',
-    !error && !valid ? 'border-[#1e1e35] focus:border-[#4f46e5] focus:shadow-[0_0_0_2px_rgba(79,70,229,0.2)] hover:border-[#2e2e50]' : '',
-    extra,
-].filter(Boolean).join(' ');
+/* ── Field wrapper ── */
+const Field = ({ label, error, children }) => (
+    <div className="flex flex-col gap-1.5">
+        <label className="text-xs tracking-widest uppercase text-text-label font-mono font-medium select-none">
+            {label}
+        </label>
+        {children}
+        {error && <p className="text-xs text-danger font-mono">{error}</p>}
+    </div>
+);
+
+/* ── Input class builder (uses clsx) ── */
+const inputCls = ({ error = false, valid = false, extra = '' } = {}) =>
+    clsx(
+        'w-full bg-surface-input border rounded-lg',
+        'px-4 py-3 text-sm text-text-body font-mono',
+        'outline-none placeholder:text-border-subtle',
+        'transition-all duration-150',
+        error && 'border-danger-border focus:border-danger focus:ring-2 focus:ring-danger/15',
+        valid && 'border-success-border focus:border-success focus:ring-2 focus:ring-success/10',
+        !error && !valid && 'border-border-subtle focus:border-brand focus:ring-2 focus:ring-brand/20 hover:border-border-mid',
+        extra,
+    );
 
 /* ════════════════════════════════════════════ */
 const RegisterPage = () => {
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState({ userName: '', email: '', password: '', confirmPassword: '' });
+    const [formData, setFormData] = useState({
+        userName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+    });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -139,12 +143,12 @@ const RegisterPage = () => {
     const [agreed, setAgreed] = useState(false);
 
     const passwordRules = [
-        { label: '8+ chars', test: p => p.length >= 8 },
-        { label: 'uppercase', test: p => /[A-Z]/.test(p) },
-        { label: 'number', test: p => /[0-9]/.test(p) },
+        { label: '8+ chars', test: (p) => p.length >= 8 },
+        { label: 'uppercase', test: (p) => /[A-Z]/.test(p) },
+        { label: 'number', test: (p) => /[0-9]/.test(p) },
     ];
 
-    const handleChange = e => {
+    const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setErrors({ ...errors, [e.target.name]: '' });
     };
@@ -162,7 +166,7 @@ const RegisterPage = () => {
         return e;
     };
 
-    const handleSubmit = async e => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const ve = validate();
         if (Object.keys(ve).length) { setErrors(ve); return; }
@@ -187,48 +191,32 @@ const RegisterPage = () => {
     ];
 
     return (
-        /* Root: full viewport, row layout on md+ */
-        <div className="min-h-screen w-full overflow-hidden bg-[#0c0c1d] font-mono flex flex-col md:flex-row">
+        /* ROOT — column on mobile, row on md+ */
+        <div className="min-h-screen w-full bg-base font-mono flex flex-col md:flex-row overflow-hidden">
 
-            {/* ══════════════════════════════════════════
-                MOBILE HEADER — shown below md only
-            ══════════════════════════════════════════ */}
-            <header className="flex md:hidden items-center justify-between
-                px-5 h-14 shrink-0
-                bg-[#0a0a1a] border-b border-[#16162e]">
+            {/* ── MOBILE HEADER (hidden md+) ── */}
+            <header className="flex md:hidden items-center justify-between px-5 h-14 shrink-0 bg-surface border-b border-border-dark">
                 <div className="flex items-center gap-2.5">
                     <LogoMark />
-                    <span className="text-[15px] font-semibold text-white tracking-tight">DevShelf</span>
+                    <span className="text-base font-semibold text-text-primary tracking-tight">DevShelf</span>
                 </div>
                 {/* Progress dots */}
                 <div className="flex items-center gap-1.5">
                     {steps.map((_, i) => (
-                        <div key={i} className={[
+                        <div key={i} className={clsx(
                             'h-1.5 rounded-full transition-all duration-300',
-                            i === 0 ? 'w-5 bg-[#4f46e5]' : 'w-1.5 bg-[#1e1e35]',
-                        ].join(' ')} />
+                            i === 0 ? 'w-5 bg-brand' : 'w-1.5 bg-border-subtle',
+                        )} />
                     ))}
                 </div>
             </header>
 
-            {/* ══════════════════════════════════════════
-                DESKTOP SIDEBAR — shown from md up
-                Matches the screenshot exactly:
-                - dark bg, right border
-                - logo at top
-                - steps with connector lines
-                - sign-in link at bottom
-            ══════════════════════════════════════════ */}
-            <aside className="hidden md:flex flex-col
-                w-[220px] shrink-0
-                bg-[#0a0a1a] border-r border-[#16162e]
-                sticky top-0 self-start h-screen
-                px-6 py-8">
-
+            {/* ── SIDEBAR (hidden mobile, visible md+) ── */}
+            <aside className="hidden md:flex flex-col w-[200px] lg:w-[220px] shrink-0 bg-surface border-r border-border-dark h-screen sticky top-0 px-5 py-8 lg:px-6">
                 {/* Brand */}
-                <div className="flex items-center gap-3 mb-12">
+                <div className="flex items-center gap-3 mb-10 lg:mb-12">
                     <LogoMark />
-                    <span className="text-[15px] font-semibold text-white tracking-tight">DevShelf</span>
+                    <span className="text-base font-semibold text-text-primary tracking-tight">DevShelf</span>
                 </div>
 
                 {/* Steps */}
@@ -239,53 +227,49 @@ const RegisterPage = () => {
                 </nav>
 
                 {/* Sign-in link pinned to bottom */}
-                <div className="mt-auto pt-6 border-t border-[#16162e]">
-                    <p className="text-[11px] text-[#25253a] font-mono mb-1.5">Already on DevShelf?</p>
-                    <Link to="/login"
-                        className="text-[12px] text-[#6366f1] no-underline hover:text-[#818cf8] transition-colors duration-150">
+                <div className="mt-auto pt-6 border-t border-border-dark">
+                    <p className="text-xs text-text-faint font-mono mb-1.5">Already on DevShelf?</p>
+                    <Link to="/login" className="text-xs text-brand-light no-underline hover:text-brand-lighter transition-colors duration-150">
                         Sign in →
                     </Link>
                 </div>
             </aside>
 
-            {/* ══════════════════════════════════════════
-                MAIN CONTENT
-                flex-1 + min-w-0 = takes remaining width
-                without overflowing the sidebar
-            ══════════════════════════════════════════ */}
-            <main className="flex-1 min-w-0 overflow-y-auto
-                px-8 py-10
-                sm:px-10 sm:py-12
-                md:px-14 md:py-14
-                lg:px-20">
-
+            {/* ── MAIN CONTENT ── */}
+            <main className="
+        flex-1 min-w-0 overflow-y-auto
+        px-5 py-8
+        sm:px-8 sm:py-10
+        md:px-10 md:py-12
+        lg:px-16 lg:py-14
+        xl:px-20
+      ">
                 {/* Eyebrow */}
-                <p className="text-[11px] tracking-[0.18em] font-medium uppercase text-[#6366f1] font-mono mb-5">
+                <p className="text-xs tracking-widest font-medium uppercase text-brand-light font-mono mb-4 md:mb-5">
                     Step 1 of 3
                 </p>
 
-                {/* Heading — matches screenshot proportions */}
-                <h1 className="font-mono font-bold text-white leading-[1.1] tracking-tight mb-2
-                    text-[32px] sm:text-[36px] lg:text-[40px]">
+                {/* Heading */}
+                <h1 className="
+          font-mono font-bold text-text-primary leading-tight tracking-tight mb-2
+          text-3xl
+          sm:text-4xl
+          lg:text-5xl
+        ">
                     Create your<br />account{' '}
-                    <span className="inline-block align-middle ml-2
-                        text-[11px] font-medium tracking-[0.06em]
-                        bg-[#1e1a4a] text-[#818cf8] border border-[#2d2870]
-                        rounded-md px-2.5 py-1">
+                    <span className="inline-block align-middle ml-2 text-xs font-medium tracking-wide bg-brand-muted text-brand-light border border-brand-border rounded-md px-2.5 py-1">
                         Free
                     </span>
                 </h1>
 
-                <p className="text-[13px] text-[#4a4a6a] font-mono mb-10 leading-relaxed">
+                <p className="text-sm text-text-muted font-mono mb-8 md:mb-10 leading-relaxed">
                     Start organizing your dev resources in minutes.
                 </p>
 
-                {/* ── FORM ──
-                    max-w-2xl so it fills the space on the right
-                    like in the screenshot (wide inputs) ── */}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-2xl">
+                {/* ── FORM ── */}
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-5 w-full max-w-xl lg:max-w-2xl">
 
-                    {/* Full Name + Username — 2 cols always on sm+ */}
+                    {/* Full Name + Username — stacked mobile, 2-col sm+ */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <Field label="Full Name" error={errors.userName}>
                             <input
@@ -325,12 +309,11 @@ const RegisterPage = () => {
                                 value={formData.password} onChange={handleChange}
                                 className={inputCls({ error: !!errors.password, extra: 'pr-12' })}
                             />
-                            <button type="button" tabIndex={-1}
-                                onClick={() => setShowPassword(v => !v)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2
-                                    text-[#35355a] hover:text-[#6a6a9a]
-                                    bg-transparent border-none p-0 cursor-pointer
-                                    flex items-center transition-colors duration-150">
+                            <button
+                                type="button" tabIndex={-1}
+                                onClick={() => setShowPassword((v) => !v)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim hover:text-text-muted bg-transparent border-0 p-0 cursor-pointer flex items-center transition-colors duration-150"
+                            >
                                 {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
@@ -340,11 +323,12 @@ const RegisterPage = () => {
                                 {passwordRules.map((rule, i) => {
                                     const ok = rule.test(formData.password);
                                     return (
-                                        <span key={i} className={[
-                                            'text-[10px] px-2.5 py-1 rounded-full font-mono border transition-all duration-200',
-                                            ok ? 'border-[#1f4d38] text-[#4ecb8a] bg-[#091a10]'
-                                                : 'border-[#1e1e35] text-[#2e2e50] bg-transparent',
-                                        ].join(' ')}>
+                                        <span key={i} className={clsx(
+                                            'text-2xs px-2.5 py-1 rounded-full font-mono border transition-all duration-200',
+                                            ok
+                                                ? 'border-success-border text-success bg-success-bg'
+                                                : 'border-border-subtle text-text-dim bg-transparent',
+                                        )}>
                                             {ok && '✓ '}{rule.label}
                                         </span>
                                     );
@@ -362,25 +346,19 @@ const RegisterPage = () => {
                                 autoComplete="new-password"
                                 placeholder="repeat password"
                                 value={formData.confirmPassword} onChange={handleChange}
-                                className={inputCls({
-                                    error: !!errors.confirmPassword,
-                                    valid: passwordsMatch,
-                                    extra: 'pr-12',
-                                })}
+                                className={inputCls({ error: !!errors.confirmPassword, valid: !!passwordsMatch, extra: 'pr-12' })}
                             />
-                            <button type="button" tabIndex={-1}
-                                onClick={() => setShowConfirm(v => !v)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2
-                                    text-[#35355a] hover:text-[#6a6a9a]
-                                    bg-transparent border-none p-0 cursor-pointer
-                                    flex items-center transition-colors duration-150">
+                            <button
+                                type="button" tabIndex={-1}
+                                onClick={() => setShowConfirm((v) => !v)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim hover:text-text-muted bg-transparent border-0 p-0 cursor-pointer flex items-center transition-colors duration-150"
+                            >
                                 {showConfirm ? <EyeIcon /> : <EyeOffIcon />}
                             </button>
                         </div>
                         {!errors.confirmPassword && passwordsMatch && (
-                            <span className="flex items-center gap-1.5 mt-1 text-[11px] text-[#4ecb8a] font-mono">
-                                <span className="w-4 h-4 rounded-full bg-[#091a10] border border-[#1f4d38]
-                                    inline-flex items-center justify-center shrink-0">
+                            <span className="flex items-center gap-1.5 mt-1 text-xs text-success font-mono">
+                                <span className="w-4 h-4 rounded-full bg-success-bg border border-success-border inline-flex items-center justify-center shrink-0">
                                     <CheckIcon />
                                 </span>
                                 Passwords match
@@ -388,53 +366,50 @@ const RegisterPage = () => {
                         )}
                     </Field>
 
-                    {/* Terms */}
+                    {/* Terms checkbox */}
                     <div className="flex flex-col gap-1">
                         <div className="flex items-start gap-3">
                             <button
                                 type="button"
-                                onClick={() => { setAgreed(v => !v); setErrors(e => ({ ...e, agreed: '' })); }}
+                                onClick={() => { setAgreed((v) => !v); setErrors((e) => ({ ...e, agreed: '' })); }}
                                 aria-label="Agree to terms"
-                                className={[
-                                    'w-5 h-5 rounded-[4px] shrink-0 mt-0.5',
-                                    'flex items-center justify-center',
-                                    'border-2 transition-all duration-150 cursor-pointer',
-                                    agreed
-                                        ? 'bg-[#4f46e5] border-[#4f46e5]'
-                                        : errors.agreed
-                                            ? 'bg-transparent border-[#5c1e1e]'
-                                            : 'bg-transparent border-[#2e2e50] hover:border-[#4f46e5]',
-                                ].join(' ')}>
+                                className={clsx(
+                                    'w-5 h-5 rounded-sm shrink-0 mt-0.5 flex items-center justify-center border-2 transition-all duration-150 cursor-pointer',
+                                    agreed && 'bg-brand border-brand',
+                                    !agreed && errors.agreed && 'bg-transparent border-danger-border',
+                                    !agreed && !errors.agreed && 'bg-transparent border-border-mid hover:border-brand',
+                                )}
+                            >
                                 {agreed && <CheckIcon />}
                             </button>
-                            <span className="text-[12px] text-[#4a4a6a] font-mono leading-[1.7]">
+                            <span className="text-xs text-text-muted font-mono leading-relaxed">
                                 I agree to the{' '}
-                                <Link to="/terms" className="text-[#818cf8] underline underline-offset-2 hover:text-[#a5b4fc] transition-colors">
+                                <Link to="/terms" className="text-brand-light underline underline-offset-2 hover:text-brand-lighter transition-colors">
                                     Terms of Service
                                 </Link>{' '}and{' '}
-                                <Link to="/privacy" className="text-[#818cf8] underline underline-offset-2 hover:text-[#a5b4fc] transition-colors">
+                                <Link to="/privacy" className="text-brand-light underline underline-offset-2 hover:text-brand-lighter transition-colors">
                                     Privacy Policy
                                 </Link>.
                                 {' '}DevShelf will never sell your data.
                             </span>
                         </div>
                         {errors.agreed && (
-                            <p className="text-[11px] text-[#e05555] font-mono ml-8">{errors.agreed}</p>
+                            <p className="text-xs text-danger font-mono ml-8">{errors.agreed}</p>
                         )}
                     </div>
 
-                    {/* Submit button */}
+                    {/* Submit */}
                     <button
                         type="submit" disabled={isSubmitting}
-                        className={[
-                            'w-full rounded-lg py-3.5 mt-1',
-                            'text-[14px] font-semibold text-white font-mono tracking-[0.04em]',
-                            'bg-[#4f46e5] border border-[#4f46e5]',
-                            'transition-all duration-150 active:scale-[0.99]',
+                        className={clsx(
+                            'w-full rounded-lg py-3 md:py-3.5 mt-1',
+                            'text-base font-semibold text-white font-mono tracking-wide',
+                            'bg-brand border border-brand transition-all duration-150 active:scale-[0.99]',
                             isSubmitting
                                 ? 'opacity-50 cursor-not-allowed'
-                                : 'cursor-pointer hover:bg-[#6366f1] hover:border-[#6366f1]',
-                        ].join(' ')}>
+                                : 'cursor-pointer hover:bg-brand-hover hover:border-brand-hover',
+                        )}
+                    >
                         {isSubmitting ? (
                             <span className="flex items-center justify-center gap-2">
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -445,37 +420,34 @@ const RegisterPage = () => {
                 </form>
 
                 {/* Divider */}
-                <div className="flex items-center gap-3 my-6 w-full max-w-2xl">
-                    <div className="flex-1 h-px bg-[#16162e]" />
-                    <span className="text-[10px] text-[#25253a] tracking-[0.12em] uppercase font-mono whitespace-nowrap">
+                <div className="flex items-center gap-3 my-6 w-full max-w-xl lg:max-w-2xl">
+                    <div className="flex-1 h-px bg-border-dark" />
+                    <span className="text-2xs text-text-faint tracking-widest uppercase font-mono whitespace-nowrap">
                         or sign up with
                     </span>
-                    <div className="flex-1 h-px bg-[#16162e]" />
+                    <div className="flex-1 h-px bg-border-dark" />
                 </div>
 
-                {/* OAuth buttons */}
-                <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
+                {/* OAuth — stacked mobile, 2-col sm+ */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl lg:max-w-2xl">
                     {[
                         { icon: <GithubIcon />, label: 'GitHub' },
                         { icon: <GoogleIcon />, label: 'Google' },
                     ].map(({ icon, label }) => (
-                        <button key={label} type="button"
+                        <button
+                            key={label} type="button"
                             onClick={() => toast(`${label} sign-up coming soon!`, { icon: '🔒' })}
-                            className="flex items-center justify-center gap-2
-                                bg-[#0e0e20] border border-[#1e1e35] rounded-lg
-                                py-3 text-[12px] text-[#4a4a6a] font-mono
-                                hover:border-[#2e2e50] hover:text-[#8888aa] hover:bg-[#111125]
-                                transition-all duration-150 cursor-pointer">
+                            className="flex items-center justify-center gap-2 bg-surface-card border border-border-subtle rounded-lg py-3 text-xs text-text-muted font-mono hover:border-border-mid hover:text-text-label hover:bg-surface-hover transition-all duration-150 cursor-pointer"
+                        >
                             {icon}{label}
                         </button>
                     ))}
                 </div>
 
-                {/* Sign-in footer */}
-                <p className="text-[12px] text-[#2e2e50] mt-6 w-full max-w-2xl font-mono">
+                {/* Footer */}
+                <p className="text-xs text-text-dim mt-6 w-full max-w-xl lg:max-w-2xl font-mono pb-8 md:pb-0">
                     Already have an account?{' '}
-                    <Link to="/login"
-                        className="text-[#818cf8] no-underline font-medium hover:text-[#a5b4fc] transition-colors">
+                    <Link to="/login" className="text-brand-light no-underline font-medium hover:text-brand-lighter transition-colors">
                         Sign in
                     </Link>
                 </p>
