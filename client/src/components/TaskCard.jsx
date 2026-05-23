@@ -1,7 +1,8 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import clsx from 'clsx';
 import taskService from '../services/taskService';
 import toast from 'react-hot-toast';
 
+/* ── Status cycle ── */
 const NEXT_STATUS = {
     'todo': 'in-progress',
     'in-progress': 'done',
@@ -14,19 +15,53 @@ const STATUS_LABELS = {
     'done': 'Done',
 };
 
-const TYPE_BADGE = {
-    'todo': 'badge-docs',
-    'in-progress': 'badge-react',
-    'done': 'badge-csharp',
+/* ── Status badge colors ── */
+const STATUS_COLORS = {
+    'todo': 'bg-slate-700      text-slate-300   hover:bg-slate-600',
+    'in-progress': 'bg-cyan-900/60    text-cyan-300    hover:bg-cyan-800/60',
+    'done': 'bg-emerald-900/60 text-emerald-300 hover:bg-emerald-800/60',
 };
 
-const PRIORITY_BADGE = {
-    'low': 'badge-other',
-    'medium': 'badge-video',
-    'high': 'badge-tool',
+/* ── Priority badge colors ── */
+const PRIORITY_COLORS = {
+    low: 'bg-slate-700/60 text-slate-400',
+    medium: 'bg-amber-900/60 text-amber-300',
+    high: 'bg-rose-900/60  text-rose-300',
 };
 
+/* ── Icons ── */
+const EditIcon = () => (
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+);
+const DeleteIcon = () => (
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+        <path d="M10 11v6M14 11v6" />
+        <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+    </svg>
+);
+const CalendarIcon = () => (
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+);
+const FolderIcon = () => (
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+    </svg>
+);
+
+/* ════════════════════════════════════════════ */
 const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
+    if (!task) return null;
+
     const formattedDue = task.dueDate
         ? new Date(task.dueDate).toLocaleDateString('en-US', {
             month: 'short', day: 'numeric', year: 'numeric',
@@ -44,64 +79,110 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
         }
     };
 
-    const tagList = [
-        task.project && `📁 ${task.project}`,
-        formattedDue && `📅 ${formattedDue}`,
-    ].filter(Boolean);
-
-    const statusBadgeClass = TYPE_BADGE[task.status] || 'badge-other';
-    const priorityBadgeClass = PRIORITY_BADGE[task.priority] || 'badge-other';
+    const statusColor = STATUS_COLORS[task.status] || STATUS_COLORS['todo'];
+    const priorityColor = PRIORITY_COLORS[task.priority?.toLowerCase()] || PRIORITY_COLORS.medium;
 
     return (
-        <div className="rc-card">
-            <div className="rc-body">
+        /*
+          CARD
+          mobile  → full width, tighter padding (p-4)
+          sm+     → slightly more padding (p-5)
+        */
+        <div className="bg-slate-800 rounded-2xl border border-slate-700 hover:border-slate-500 transition-all duration-150 flex flex-col w-full">
 
-                {/* Header */}
-                <div className="rc-header">
-                    <h3 className="rc-title">{task.title}</h3>
+            {/* ── BODY ── */}
+            <div className="p-4 sm:p-5 flex-1 flex flex-col gap-2.5 sm:gap-3">
+
+                {/* Title + status badge */}
+                <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-white text-sm leading-snug">
+                        {task.title}
+                    </h3>
                     <button
                         onClick={handleStatusToggle}
-                        className={`rc-badge ${statusBadgeClass}`}
                         title="Click to advance status"
+                        className={clsx(
+                            'text-xs font-medium px-2.5 py-0.5 rounded-full shrink-0 capitalize',
+                            'border-0 cursor-pointer transition-all duration-150',
+                            statusColor,
+                        )}
                     >
-                        {STATUS_LABELS[task.status] || task.status}
+                        {/* mobile → shorter "Active" label for in-progress */}
+                        <span className="sm:hidden">
+                            {task.status === 'in-progress' ? 'Active' : STATUS_LABELS[task.status] || task.status}
+                        </span>
+                        <span className="hidden sm:inline">
+                            {STATUS_LABELS[task.status] || task.status}
+                        </span>
                     </button>
                 </div>
 
-                {/* Priority shown where URL/filepath goes */}
-                <p className="rc-filepath">
-                    <span className={`rc-badge ${priorityBadgeClass}`}>
+                {/* Priority badge */}
+                <div>
+                    <span className={clsx(
+                        'text-xs font-medium px-2 py-0.5 rounded-full capitalize',
+                        priorityColor,
+                    )}>
                         {task.priority} priority
                     </span>
-                </p>
+                </div>
 
-                {/* Description shown as notes */}
+                {/* Description — 2 lines mobile, 3 lines sm+ */}
                 {task.description && (
-                    <p className="rc-notes">{task.description}</p>
+                    <p className="text-xs text-slate-400 line-clamp-2 sm:line-clamp-3 leading-relaxed">
+                        {task.description}
+                    </p>
+                )}
+
+                {/* Meta pills — project + due date */}
+                {(task.project || formattedDue) && (
+                    <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-auto pt-1">
+                        {task.project && (
+                            <span className="flex items-center gap-1 text-xs bg-indigo-900/60 text-indigo-300 px-2 py-0.5 rounded-full">
+                                <FolderIcon />
+                                <span className="max-w-[100px] sm:max-w-none truncate">
+                                    {task.project}
+                                </span>
+                            </span>
+                        )}
+                        {formattedDue && (
+                            <span className="flex items-center gap-1 text-xs bg-indigo-900/60 text-indigo-300 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                <CalendarIcon />{formattedDue}
+                            </span>
+                        )}
+                    </div>
                 )}
             </div>
 
-            {/* Footer */}
-            <div className="rc-footer">
-                <div className="rc-tags">
-                    {tagList.length > 0 && (
-                        <span className="rc-tag">{tagList.join('  ·  ')}</span>
-                    )}
-                </div>
-                <div className="rc-actions">
-                    <button className="rc-btn rc-btn-edit" onClick={onEdit} aria-label="Edit">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
+            {/* ── FOOTER ── */}
+            <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-t border-white/[0.07] flex items-center justify-between gap-2">
+
+                {/* Created date — hidden on mobile */}
+                <span className="hidden sm:block text-xs text-slate-500 truncate">
+                    {task.createdAt
+                        ? new Date(task.createdAt).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric', year: 'numeric',
+                        })
+                        : 'No date'}
+                </span>
+
+                {/* Action buttons — icon only on mobile, icon + label on sm+ */}
+                <div className="flex gap-1.5 sm:gap-2 ml-auto">
+                    <button
+                        onClick={onEdit}
+                        aria-label="Edit task"
+                        className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded-lg hover:bg-indigo-600/15 transition-colors duration-150 cursor-pointer border-0 bg-transparent"
+                    >
+                        <EditIcon />
+                        <span className="hidden sm:inline">Edit</span>
                     </button>
-                    <button className="rc-btn rc-btn-delete" onClick={onDelete} aria-label="Delete">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path>
-                            <path d="M10 11v6M14 11v6"></path>
-                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path>
-                        </svg>
+                    <button
+                        onClick={onDelete}
+                        aria-label="Delete task"
+                        className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded-lg hover:bg-red-600/15 transition-colors duration-150 cursor-pointer border-0 bg-transparent"
+                    >
+                        <DeleteIcon />
+                        <span className="hidden sm:inline">Delete</span>
                     </button>
                 </div>
             </div>
