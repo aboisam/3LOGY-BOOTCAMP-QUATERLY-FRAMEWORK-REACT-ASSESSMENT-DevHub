@@ -1,56 +1,67 @@
 /** @format */
 
-// All resource API calls live here — same pattern as snippetService
+// All task API calls live here
 import api from "./api";
 
-// Fetch every resource belonging to the logged-in user
+// Fetch every task belonging to the logged-in user
 const getAll = async () => {
   try {
-    const response = await api.get("/api/resources");
+    const response = await api.get("/api/tasks");
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: "Failed to fetch resources" };
+    throw error.response?.data || { error: "Failed to fetch tasks" };
   }
 };
 
-// Fetch a single resource by ID
+// Fetch a single task by ID
 const getById = async (id) => {
   try {
-    const response = await api.get(`/api/resources/${id}`);
+    const response = await api.get(`/api/tasks/${id}`);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: "Failed to fetch resource" };
+    throw error.response?.data || { error: "Failed to fetch task" };
   }
 };
 
-// Create a new resource and return the server-assigned object
+// Create a new task and return the server-assigned object
 const create = async (data) => {
   try {
     const response = await api.post("/api/tasks", data);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: "Failed to create resource" };
+    throw error.response?.data || { error: "Failed to create task" };
   }
 };
 
-// Replace an existing resource's data entirely
+// Replace an existing task's data entirely
 const update = async (id, data) => {
   try {
-    const response = await api.put(`/api/resources/${id}`, data);
+    const response = await api.put(`/api/tasks/${id}`, data);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: "Failed to update resource" };
+    throw error.response?.data || { error: "Failed to update task" };
   }
 };
 
-// Delete a resource permanently
+// Quick status toggle — PATCH /api/tasks/{id}/status
+const updateStatus = async (id, status) => {
+  try {
+    const response = await api.patch(`/api/tasks/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { error: "Failed to update task status" };
+  }
+};
+
+// Delete a task permanently
 const remove = async (id) => {
   try {
-    const response = await api.delete(`/api/resources/${id}`);
+    const response = await api.delete(`/api/tasks/${id}`);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { error: "Failed to delete resource" };
+    throw error.response?.data || { error: "Failed to delete task" };
   }
 };
 
-export default { getAll, getById, create, update, remove };
+export default { getAll, getById, create, update, updateStatus, remove };
+
