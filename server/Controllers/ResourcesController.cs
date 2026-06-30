@@ -20,10 +20,12 @@ public class ResourcesController : ControllerBase
         _context = context;
     }
 
-    private Guid GetUserId()
+    private Guid? GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.Parse(userIdClaim!);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            return null;
+        return userId;
     }
 
     // GET /api/resources — Get all resources for the logged-in user
@@ -31,8 +33,10 @@ public class ResourcesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var resources = await _context.Resources
-            .Where(r => r.UserId == userId)
+            .Where(r => r.UserId == userId.Value)
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => new
             {
@@ -54,8 +58,10 @@ public class ResourcesController : ControllerBase
     public async Task<IActionResult> GetById(Guid id)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var resource = await _context.Resources
-            .Where(r => r.Id == id && r.UserId == userId)
+            .Where(r => r.Id == id && r.UserId == userId.Value)
             .Select(r => new
             {
                 r.Id,
@@ -79,6 +85,7 @@ public class ResourcesController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateResourceDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
 
         var resource = new Resource
         {
@@ -88,7 +95,7 @@ public class ResourcesController : ControllerBase
             Notes = dto.Notes,
             Type = dto.Type,
             Tags = dto.Tags,
-            UserId = userId,
+            UserId = userId.Value,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -112,8 +119,10 @@ public class ResourcesController : ControllerBase
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateResourceDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var resource = await _context.Resources
-            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId.Value);
 
         if (resource == null)
             return NotFound(new { error = "Resource not found" });
@@ -143,8 +152,10 @@ public class ResourcesController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var resource = await _context.Resources
-            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId.Value);
 
         if (resource == null)
             return NotFound(new { error = "Resource not found" });

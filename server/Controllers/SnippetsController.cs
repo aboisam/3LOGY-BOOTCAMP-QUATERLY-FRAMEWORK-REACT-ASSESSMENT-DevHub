@@ -21,10 +21,12 @@ public class SnippetsController : ControllerBase
     }
 
     // Helper: Extract userId from JWT claims
-    private Guid GetUserId()
+    private Guid? GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.Parse(userIdClaim!);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            return null;
+        return userId;
     }
 
     // GET /api/snippets — Get all snippets for the logged-in user
@@ -32,8 +34,10 @@ public class SnippetsController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var snippets = await _context.Snippets
-            .Where(s => s.UserId == userId)
+            .Where(s => s.UserId == userId.Value)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new
             {
@@ -56,8 +60,10 @@ public class SnippetsController : ControllerBase
     public async Task<IActionResult> GetById(Guid id)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var snippet = await _context.Snippets
-            .Where(s => s.Id == id && s.UserId == userId)
+            .Where(s => s.Id == id && s.UserId == userId.Value)
             .Select(s => new
             {
                 s.Id,
@@ -82,6 +88,7 @@ public class SnippetsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateSnippetDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
 
         var snippet = new Snippet
         {
@@ -91,7 +98,7 @@ public class SnippetsController : ControllerBase
             Code = dto.Code,
             Language = dto.Language,
             Tags = dto.Tags,
-            UserId = userId,
+            UserId = userId.Value,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -117,8 +124,10 @@ public class SnippetsController : ControllerBase
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSnippetDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var snippet = await _context.Snippets
-            .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
+            .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId.Value);
 
         if (snippet == null)
             return NotFound(new { error = "Snippet not found" });
@@ -150,8 +159,10 @@ public class SnippetsController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var snippet = await _context.Snippets
-            .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
+            .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId.Value);
 
         if (snippet == null)
             return NotFound(new { error = "Snippet not found" });

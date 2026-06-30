@@ -20,10 +20,12 @@ public class TasksController : ControllerBase
         _context = context;
     }
 
-    private Guid GetUserId()
+    private Guid? GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.Parse(userIdClaim!);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            return null;
+        return userId;
     }
 
     // GET /api/tasks — Get all tasks for the logged-in user
@@ -31,8 +33,10 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var tasks = await _context.DevTasks
-            .Where(t => t.UserId == userId)
+            .Where(t => t.UserId == userId.Value)
             .OrderByDescending(t => t.CreatedAt)
             .Select(t => new
             {
@@ -56,8 +60,10 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> GetById(Guid id)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var task = await _context.DevTasks
-            .Where(t => t.Id == id && t.UserId == userId)
+            .Where(t => t.Id == id && t.UserId == userId.Value)
             .Select(t => new
             {
                 t.Id,
@@ -83,6 +89,7 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateTaskDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
 
         var task = new DevTask
         {
@@ -93,7 +100,7 @@ public class TasksController : ControllerBase
             Priority = dto.Priority,
             Project = dto.Project,
             DueDate = dto.DueDate,
-            UserId = userId,
+            UserId = userId.Value,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -120,8 +127,10 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTaskDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var task = await _context.DevTasks
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId.Value);
 
         if (task == null)
             return NotFound(new { error = "Task not found" });
@@ -155,8 +164,10 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateTaskStatusDto dto)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var task = await _context.DevTasks
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId.Value);
 
         if (task == null)
             return NotFound(new { error = "Task not found" });
@@ -185,8 +196,10 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = GetUserId();
+        if (userId == null) return Unauthorized(new { error = "Invalid token" });
+
         var task = await _context.DevTasks
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId.Value);
 
         if (task == null)
             return NotFound(new { error = "Task not found" });
